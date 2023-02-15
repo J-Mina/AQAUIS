@@ -93,10 +93,11 @@ def train(model: torch.nn.Module,
                                        loss_fn=loss_fn,
                                        optimizer=optimizer,
                                        device=device)
+                                       
     validation_loss, validation_acc = validation_step(model=model,
-                                    dataloader=validation_dataloader,
-                                    loss_fn=loss_fn,
-                                    device=device)
+                                                      dataloader=validation_dataloader,
+                                                      loss_fn=loss_fn,
+                                                      device=device)
     
     # 4. Print out what's happening
     print(

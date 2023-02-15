@@ -26,7 +26,7 @@ class ResBlock(nn.Module):
         # self.bn2 = nn.BatchNorm2d(out_channels)
         # self.conv3 = nn.Conv2d(out_channels, out_channels*self.expansion, kernel_size=1, stride=1, padding=0)
         # self.bn3 = nn.BatchNorm2d(out_channels*self.expansion)
-        self.relu = nn.ReLU()
+        self.relu = nn.ReLU(inplace=False)
         self.identity_downsample = identity_downsample
         self.out_channels = out_channels
 
@@ -41,7 +41,7 @@ class ResBlock(nn.Module):
         if self.identity_downsample is not None:
             identity = self.identity_downsample(identity)
         
-        x += identity
+        x = x + identity
         x = self.relu(x)
 
         return x
@@ -56,7 +56,7 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
         self.initBlock = nn.Sequential(
             nn.Conv2d(image_channels, 64, kernel_size=7, stride=2, padding=3),
             nn.BatchNorm2d(64),
-            nn.ReLU(),
+            nn.ReLU(inplace=False),
             nn.MaxPool2d(kernel_size=3, stride=2,padding=1), 
         )
 
