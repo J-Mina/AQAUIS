@@ -75,6 +75,11 @@ def split_data(data_source, data_folder, split_size, num_img_class = 0):
     num_img_class -> Number of images per class to keep in the dataset. (For the creation of smaller datasets or in this case balancing).
     """
 
+    #Change disk directory
+    base_path = Path("G:/Dissertation/")
+    if(Path().cwd() != Path(r"G:\Dissertation")):
+        os.chdir(base_path)
+
     #Verify if the folder exists, if not creates it
     check_dir(data_folder)
 

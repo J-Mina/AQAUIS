@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import tqdm.auto as tqdm
+from tqdm.auto import tqdm
 
 #train step
 def train_step(model: torch.nn.Module,
@@ -70,8 +70,6 @@ def validation_step(model: torch.nn.Module,
   validation_acc = validation_acc / len(dataloader)
   return validation_loss, validation_acc
 
-
-  from tqdm.auto import tqdm
 
 # 1. Create a train function that takes in various model parameters + optimizer + dataloaders + loss function
 def train(model: torch.nn.Module,
