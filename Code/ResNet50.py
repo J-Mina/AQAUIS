@@ -30,7 +30,7 @@ class ResBlock(nn.Module):
         self.identity_downsample = identity_downsample
         self.out_channels = out_channels
 
-    def forward(self,x):
+    def forward(self, x):
         identity = x
 
         x = self.sub_Block1(x)
@@ -68,20 +68,6 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
 
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.fc = nn.Linear(512*4, num_classes)
-    
-    def forward(self,x):
-        x = self.initBlock(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
-
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
-
-        return x
 
     def _make_layer(self, block, num_blocks, out_channels, stride):
         identity_downsample = None
@@ -97,6 +83,20 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
             layers.append(ResBlock(self.in_channels, out_channels)) 
         
         return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.initBlock(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+
+        return x
 
 
 

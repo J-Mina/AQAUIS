@@ -104,8 +104,8 @@ def train(model: torch.nn.Module,
           f"Epoch: {epoch+1} | "
           f"train_loss: {train_loss:.4f} | "
           f"train_acc: {train_acc:.4f} | "
-          f"test_loss: {validation_loss:.4f} | "
-          f"test_acc: {validation_acc:.4f}"
+          f"validation_loss: {validation_loss:.4f} | "
+          f"validation_acc: {validation_acc:.4f}"
         )
 
     # 5. Update results dictionary
