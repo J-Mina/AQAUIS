@@ -3,6 +3,8 @@ import torch
 from data_preparation import check_dir
 import os
 from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
+from typing import Tuple, Dict, List
 
 def save_model(model_path, model_name, model):
 
@@ -31,12 +33,17 @@ def load_model(model, model_path):
 def eval_model(model: torch.nn.Module,
                data_loader: torch.utils.data.DataLoader,
                loss_fn: torch.nn.Module, 
-               accuracy_fn):
+               accuracy_fn,
+               device : torch.device):
   """Returns a dictionary containing the results of model predicting on data_loader."""
   loss, acc = 0, 0
   model.eval()
   with torch.inference_mode():
     for X, y in tqdm(data_loader):
+
+      X = X.to(device)
+      y = y.to(device)
+
       # Make predictions
       y_pred = model(X)
 
@@ -66,3 +73,44 @@ def accuracy_fn(y_true, y_pred):
     correct = torch.eq(y_true, y_pred).sum().item()
     acc = (correct / len(y_pred)) * 100
     return acc
+
+def plot_loss_curves(results: Dict[str, List[float]]):
+    """Plots training curves of a results dictionary.
+
+    Args:
+        results (dict): dictionary containing list of values, e.g.
+            {"train_loss": [...],
+             "train_acc": [...],
+             "test_loss": [...],
+             "test_acc": [...]}
+    """
+    
+    # Get the loss values of the results dictionary (training and test)
+    loss = results['train_loss']
+    validation_loss = results['validation_loss']
+
+    # Get the accuracy values of the results dictionary (training and test)
+    accuracy = results['train_acc']
+    validation_accuracy = results['validation_acc']
+
+    # Figure out how many epochs there were
+    epochs = range(len(results['validation_loss']))
+
+    # Setup a plot 
+    plt.figure(figsize=(10, 5))
+
+    # Plot loss
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, loss, label='train_loss')
+    plt.plot(epochs, validation_loss, label='validation_loss')
+    plt.title('Loss')
+    plt.xlabel('Epochs')
+    plt.legend()
+
+    # Plot accuracy
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, accuracy, label='train_accuracy')
+    plt.plot(epochs, validation_accuracy, label='test_accuracy')
+    plt.title('Accuracy')
+    plt.xlabel('Epochs')
+    plt.legend();
