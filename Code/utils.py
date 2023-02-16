@@ -2,7 +2,7 @@ from pathlib import Path
 import torch
 from data_preparation import check_dir
 import os
-import tqdm.auto as tqdm
+from tqdm.auto import tqdm
 
 def save_model(model_path, model_name, model):
 
