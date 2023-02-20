@@ -4,7 +4,7 @@ from torch import Tensor
 
 #Create ResNet50 Model Class
 class ResBlock50(nn.Module):
-    def __init__(self, in_channels, out_channels, identity_downsample=None, stride=1):
+    def __init__(self, in_channels, out_channels, downsample=None, stride=1):
         super(ResBlock50, self).__init__()
         self.expansion = 4
 
@@ -28,7 +28,7 @@ class ResBlock50(nn.Module):
         # self.conv3 = nn.Conv2d(out_channels, out_channels*self.expansion, kernel_size=1, stride=1, padding=0)
         # self.bn3 = nn.BatchNorm2d(out_channels*self.expansion)
         self.relu = nn.ReLU(inplace=False)
-        self.identity_downsample = identity_downsample
+        self.identity_downsample = downsample
         self.out_channels = out_channels
 
     def forward(self, x):
@@ -39,8 +39,8 @@ class ResBlock50(nn.Module):
         x = self.sub_Block3(x)
         x = self.relu(x)
 
-        if self.identity_downsample is not None:
-            identity = self.identity_downsample(identity)
+        if self.downsample is not None:
+            identity = self.downsample(identity)
         
         x = x + identity
         x = self.relu(x)
@@ -48,7 +48,7 @@ class ResBlock50(nn.Module):
         return x
 
 
-class ResNet(nn.Module): # [3, 4, 6, 3]
+class ResNet(nn.Module):
     def __init__(self, block, layers, image_channels, num_classes, num_layers):
         super(ResNet, self).__init__()
 
@@ -77,14 +77,14 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
         self.fc = nn.Linear(512*self.expansion, num_classes)
 
     def _make_layer(self, block, num_blocks, out_channels, stride):
-        identity_downsample = None
+        downsample = None
         layers=[]
         if stride != 1 or self.in_channels != out_channels * self.expansion:
-            identity_downsample = nn.Sequential(
-                                                nn.Conv2d(self.in_channels, out_channels*self.expansion, kernel_size=1,stride=stride),
-                                                nn.BatchNorm2d(out_channels*self.expansion))
+            downsample = nn.Sequential(
+                                        nn.Conv2d(self.in_channels, out_channels*self.expansion, kernel_size=1,stride=stride),
+                                        nn.BatchNorm2d(out_channels*self.expansion))
 
-        layers.append(block(self.in_channels, out_channels, identity_downsample, stride))
+        layers.append(block(self.in_channels, out_channels, downsample, stride))
         self.in_channels = out_channels*self.expansion
 
         for i in range(num_blocks -1):

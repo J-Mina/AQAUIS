@@ -8,6 +8,9 @@ def train_step(model: torch.nn.Module,
                loss_fn: torch.nn.Module,
                optimizer:torch.optim.Optimizer,
                device= torch.device):
+    """
+    Training step function.
+    """
 
     model.train()
 
@@ -40,6 +43,10 @@ def validation_step(model: torch.nn.Module,
               dataloader: torch.utils.data.DataLoader,
               loss_fn: torch.nn.Module,
               device=torch.device):
+
+  """
+  Test step function.
+  """
   # Put model in eval mode
   model.eval()
 
@@ -71,6 +78,22 @@ def train(model: torch.nn.Module,
           loss_fn: torch.nn.Module = nn.CrossEntropyLoss(),
           epochs: int = 5, 
           device= torch.device):
+
+
+  """
+  Args:
+  model -> Model to train.
+  train_dataloades -> Train data iterable.
+  validation_dataloader -> Validation data iterable.
+  optimizer -> Optimizer function.
+  loss_fn -> Loss Function.
+  epochs -> Number of epochs to do. (default 5)
+  device -> Device to train the model
+
+  Returns:
+  Returns numpy dictionary with train and validation loss and accuracy.
+  
+  """
   
   results = {"train_loss": [],
              "train_acc": [],
