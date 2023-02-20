@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
+from torch import Tensor
 
 #Create ResNet50 Model Class
-class ResBlock(nn.Module):
+class ResBlock50(nn.Module):
     def __init__(self, in_channels, out_channels, identity_downsample=None, stride=1):
-        super(ResBlock, self).__init__()
+        super(ResBlock50, self).__init__()
         self.expansion = 4
 
         self.sub_Block1= nn.Sequential(
@@ -48,10 +49,16 @@ class ResBlock(nn.Module):
 
 
 class ResNet(nn.Module): # [3, 4, 6, 3]
-    def __init__(self, block, layers, image_channels, num_classes):
+    def __init__(self, block, layers, image_channels, num_classes, num_layers):
         super(ResNet, self).__init__()
 
         self.in_channels = 64
+
+        if (num_layers == 18 or num_layers == 34):
+            self.expansion = 1
+        else:
+            self.expansion = 4
+
 
         self.initBlock = nn.Sequential(
             nn.Conv2d(image_channels, 64, kernel_size=7, stride=2, padding=3),
@@ -67,20 +74,21 @@ class ResNet(nn.Module): # [3, 4, 6, 3]
         self.layer4 = self._make_layer(block, layers[3], out_channels=512, stride = 2)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
-        self.fc = nn.Linear(512*4, num_classes)
+        self.fc = nn.Linear(512*self.expansion, num_classes)
 
     def _make_layer(self, block, num_blocks, out_channels, stride):
         identity_downsample = None
         layers=[]
-        if stride != 1 or self.in_channels != out_channels * 4:
-            identity_downsample = nn.Sequential(nn.Conv2d(self.in_channels, out_channels*4, kernel_size=1,stride=stride),
-                                                nn.BatchNorm2d(out_channels*4))
+        if stride != 1 or self.in_channels != out_channels * self.expansion:
+            identity_downsample = nn.Sequential(
+                                                nn.Conv2d(self.in_channels, out_channels*self.expansion, kernel_size=1,stride=stride),
+                                                nn.BatchNorm2d(out_channels*self.expansion))
 
         layers.append(block(self.in_channels, out_channels, identity_downsample, stride))
-        self.in_channels = out_channels*4 
+        self.in_channels = out_channels*self.expansion
 
         for i in range(num_blocks -1):
-            layers.append(ResBlock(self.in_channels, out_channels)) 
+            layers.append(block(self.in_channels, out_channels)) 
         
         return nn.Sequential(*layers)
 
@@ -105,4 +113,53 @@ def ResNet50(img_channels=3, num_classes=5):
     img_channels: Number os input channels of the network. (3 -> RGB)
     num_classes: Number of classes in the data.
     """
-    return ResNet(ResBlock, [3, 4, 6, 3], img_channels, num_classes)
+    return ResNet(ResBlock50, [3, 4, 6, 3], img_channels, num_classes, 50)
+
+
+
+### Implement ResNet 18/34 block
+class BasicBlock(nn.Module):
+    def __init__(self, in_channels: int,out_channels: int, stride = 1, expansion = 1, downsample = None):
+        super(BasicBlock, self).__init__()
+        # Multiplicative factor for the subsequent conv2d layer's output channels.
+        # It is 1 for ResNet18 and ResNet34.
+        self.expansion = expansion
+        self.downsample = downsample
+
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1,bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(out_channels, out_channels*self.expansion, kernel_size=3, padding=1,bias=False)
+        self.bn2 = nn.BatchNorm2d(out_channels*self.expansion)
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+        return  out
+
+def ResNet18(img_channels=3, num_classes=5):
+    """
+    img_channels: Number os input channels of the network. (3 -> RGB)
+    num_classes: Number of classes in the data.
+    """
+    return ResNet(BasicBlock, [2, 2, 2, 2], img_channels, num_classes, 18)
+
+
+def ResNet34(img_channels=3, num_classes=5):
+    """
+    img_channels: Number os input channels of the network. (3 -> RGB)
+    num_classes: Number of classes in the data.
+    """
+    return ResNet(BasicBlock, [3, 4, 6, 3], img_channels, num_classes, 34)

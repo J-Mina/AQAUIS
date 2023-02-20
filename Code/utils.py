@@ -5,6 +5,8 @@ import os
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from typing import Tuple, Dict, List
+import torch.nn.functional as F
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 def save_model(model_path, model_name, model):
 
@@ -110,7 +112,42 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     # Plot accuracy
     plt.subplot(1, 2, 2)
     plt.plot(epochs, accuracy, label='train_accuracy')
-    plt.plot(epochs, validation_accuracy, label='test_accuracy')
+    plt.plot(epochs, validation_accuracy, label='validation_accuracy')
     plt.title('Accuracy')
     plt.xlabel('Epochs')
     plt.legend();
+
+def get_device():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    return device
+
+
+def get_predictions(model, dataloader, device):
+    model.eval()
+    images=[]
+    labels=[]
+    probs = []
+
+    with torch.inference_mode():
+        for(X, y) in dataloader:
+            X = X.to(device)
+            y_pred  = model(X)
+            y_prob = F.softmax(y_pred, dim=-1)
+            images.append(X.cpu())
+            labels.append(y.cpu())
+            probs.append(y_prob.cpu())
+
+    images = torch.cat(images, dim=0)
+    labels = torch.cat(labels, dim=0)
+    probs = torch.cat(probs, dim=0)
+
+    return images, labels, probs
+
+
+
+def plot_confusion_matrix(labels, pred_labels, classes):
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(1, 1, 1)
+    cm = confusion_matrix(labels,pred_labels)
+    cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
+    cm.plot(values_format='d', cmap='Blues', ax=ax)

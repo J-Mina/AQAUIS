@@ -55,7 +55,6 @@ def convert_all(DATASET_PATH, LIST_PATHS, RAW_DATA_PATH):
 
         raw_full_path_folders = RAW_DATA_PATH + LIST_PATHS[i]
 
-        os.chdir('E:/')
         videos = glob.glob(raw_full_path_folders+"/*.mp4")
 
         for j, video in enumerate(videos):
