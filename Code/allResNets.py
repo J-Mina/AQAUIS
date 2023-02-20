@@ -102,22 +102,25 @@ class ResNet(nn.Module):
 
         identity_downsample = nn.Sequential(nn.Conv2d(self.in_channels, intermediate_channels*self.expansion, kernel_size=1, stride=stride),
                                             nn.BatchNorm2d(intermediate_channels*self.expansion))
+
         layers.append(block(num_layers, self.in_channels, intermediate_channels, identity_downsample, stride))
+
         self.in_channels = intermediate_channels * self.expansion
+
         for i in range(num_residual_blocks - 1):
             layers.append(block(num_layers, self.in_channels, intermediate_channels)) 
         return nn.Sequential(*layers)
 
 
-def ResNet18(img_channels=3, num_classes=1000):
+def ResNet18(img_channels=3, num_classes=5):
     return ResNet(18, Block, img_channels, num_classes)
 
 
-def ResNet34(img_channels=3, num_classes=1000):
+def ResNet34(img_channels=3, num_classes=5):
     return ResNet(34, Block, img_channels, num_classes)
 
 
-def ResNet50(img_channels=3, num_classes=1000):
+def ResNet50(img_channels=3, num_classes=5):
     return ResNet(50, Block, img_channels, num_classes)
 
 
@@ -125,5 +128,5 @@ def ResNet101(img_channels=3, num_classes=1000):
     return ResNet(101, Block, img_channels, num_classes)
 
 
-def ResNet152(img_channels=3, num_classes=1000):
+def ResNet152(img_channels=3, num_classes=5):
     return ResNet(152, Block, img_channels, num_classes)

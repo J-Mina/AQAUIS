@@ -65,13 +65,12 @@ def split_data(data_source, data_folder, split_size, num_img_class = 0):
     """
     Split all of the data into training, validation and testing with a split size.
 
+    Args:
     data_source -> Folder that has the dataset folder.
-
     data_folder -> Folder in which the data should be splitted to.
-
     split_size -> Ratio of training to testing data from [trainning(0-1),validation(0-1),testing(0-1)] make sure that the sum is 1.
-
     num_img_class -> Number of images per class to keep in the dataset. (For the creation of smaller datasets or in this case balancing).
+    
     """
 
     #Change disk directory
