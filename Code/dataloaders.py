@@ -5,25 +5,30 @@ import os
 NUM_WORKERS = os.cpu_count()
 
 def create_dataloaders(
-    train_dir: str,
-    test_dir: str,
-    validation_dir:str,
+    data_dir: str,
     transform: transforms.Compose,
     batch_size: int,
     num_workers:int=NUM_WORKERS):
 
     """
     Args:
-    train_dir -> Path to training directory.
-    validation_dir -> Path to validation directory.
-    test_dir -> Path to testing directory.
+
+    data_dir -> Path to data directory with (train/validation/test split).
+
     transform -> torchvision transforms to perform on training, validation and testing data.
+
     batch_size -> Number of samples per batch in each of the DataLoaders.
+
     num_workers -> An integer for number of workers per DataLoader.
 
     Returns:
-    train dataloader, validation_dataloader, test_dataloader, train_data, validation_data, test_data class_names
+
+    train dataloader, validation_dataloader, test_dataloader, train_data, validation_data, test_data, class_names
     """
+
+    train_dir = data_dir / "train/"
+    validation_dir = data_dir / "validation/"
+    test_dir = data_dir / "test/"
 
 
     # Use ImageFolder to create dataset(s)
@@ -57,4 +62,4 @@ def create_dataloaders(
                                         num_workers=num_workers,
                                         shuffle=False)
 
-    return train_dataloader, validation_dataloader, test_dataloader, class_names, train_data, validation_data, test_data
+    return train_dataloader, validation_dataloader, test_dataloader, train_data, validation_data, test_data, class_names

@@ -75,7 +75,7 @@ def train(model: torch.nn.Module,
           train_dataloader,
           validation_dataloader,
           optimizer,
-          loss_fn: torch.nn.Module = nn.CrossEntropyLoss(),
+          loss_fn: torch.nn.Module,
           epochs: int = 5, 
           device= torch.device):
 

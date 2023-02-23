@@ -151,3 +151,9 @@ def plot_confusion_matrix(labels, pred_labels, classes):
     cm = confusion_matrix(labels,pred_labels)
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
+
+def change_to_disk():
+    #Change disk directory
+    base_path = Path("G:/Dissertation/")
+    if(Path().cwd() != Path(r"G:\Dissertation")):
+        os.chdir(base_path)
