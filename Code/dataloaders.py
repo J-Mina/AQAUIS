@@ -12,17 +12,13 @@ def create_dataloaders(
 
     """
     Args:
-
-    data_dir -> Path to data directory with (train/validation/test split).
-
-    transform -> torchvision transforms to perform on training, validation and testing data.
-
-    batch_size -> Number of samples per batch in each of the DataLoaders.
-
-    num_workers -> An integer for number of workers per DataLoader.
+    data_dir : Path to data directory with (train/validation/test split).
+    transform : torchvision transforms to perform on training, validation and testing data.
+    batch_size : Number of samples per batch in each of the DataLoaders.
+    num_workers : An integer for number of workers per DataLoader.
 
     Returns:
-
+    
     train dataloader, validation_dataloader, test_dataloader, train_data, validation_data, test_data, class_names
     """
 

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from tqdm.auto import tqdm
+from timeit import default_timer as timer
 
 #train step
 def train_step(model: torch.nn.Module,
@@ -82,16 +83,16 @@ def train(model: torch.nn.Module,
 
   """
   Args:
-  model -> Model to train.
-  train_dataloades -> Train data iterable.
-  validation_dataloader -> Validation data iterable.
-  optimizer -> Optimizer function.
-  loss_fn -> Loss Function.
-  epochs -> Number of epochs to do. (default 5)
-  device -> Device to train the model
+  model : Model to train.
+  train_dataloades : Train data iterable.
+  validation_dataloader : Validation data iterable.
+  optimizer : Optimizer function.
+  loss_fn : Loss Function.
+  epochs : Number of epochs to do. (default 5)
+  device : Device to train the model
 
   Returns:
-  Returns numpy dictionary with train and validation loss and accuracy.
+  Returns numpy dictionary with train and validation loss and accuracy and training time
   
   """
   
@@ -99,6 +100,8 @@ def train(model: torch.nn.Module,
              "train_acc": [],
              "validation_loss": [],
              "validation_acc": []}
+
+  start = timer()
   
   for epoch in tqdm(range(epochs)):
     train_loss, train_acc = train_step(model=model,
@@ -127,5 +130,8 @@ def train(model: torch.nn.Module,
     results["validation_loss"].append(validation_loss)
     results["validation_acc"].append(validation_acc)
   
+  end = timer()
+
+  time = end - start
   #Return the  results at the end of the epochs
-  return results
+  return results, time

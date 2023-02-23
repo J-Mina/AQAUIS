@@ -37,31 +37,48 @@ def eval_model(model: torch.nn.Module,
                data_loader: torch.utils.data.DataLoader,
                loss_fn: torch.nn.Module, 
                accuracy_fn,
-               device : torch.device):
-  """Returns a dictionary containing the results of model predicting on data_loader."""
-  loss, acc = 0, 0
-  model.eval()
-  with torch.inference_mode():
-    for X, y in tqdm(data_loader):
+               device : torch.device,
+               dummy_input):
+    """
+    Args:
+    model : Model to evaluate.
+    data_loader : Data in wich the model will be evaluated (Test Data).
+    loss_fn : Loss function to use.
+    accuracy_fn : Function that calculates accuracy.
+    device : Device on wich the model shall be evaluated.
+    dummy_input : Tensor with the size of the model input to calculate the inference time (e.g. torch.rand(32,3,224,224)).
 
-      X = X.to(device)
-      y = y.to(device)
+    Returns:
 
-      # Make predictions
-      y_pred = model(X)
+    Returns a dictionary containing the results of model predicting on data_loader (name, loss, accuracy, mean inference_time).
+    """
 
-      # Accumulate the loss and acc values per batch
-      loss += loss_fn(y_pred, y)
-      acc += accuracy_fn(y_true=y,
-                         y_pred=y_pred.argmax(dim=1))
+    mn_time, std_time = cal_inference_time(model, dummy_input)
 
-    # Scale loss and acc to find the average loss/acc per batch
-    loss /= len(data_loader)
-    acc /= len(data_loader)
+    loss, acc = 0, 0
+    model.eval()
+    with torch.inference_mode():
+        for X, y in tqdm(data_loader):
+            X = X.to(device)
+            y = y.to(device)
 
-  return {"model_name": model.__class__.__name__, # only works when model was created with a class
-          "model_loss": loss.item(),
-          "model_acc": acc}
+            # Make predictions
+            y_pred_logits = model(X)
+
+            # Accumulate the loss and acc values per batch
+            loss += loss_fn(y_pred_logits, y)
+            acc += accuracy_fn(y_true=y,
+                                y_pred=torch.argmax(torch.softmax(y_pred_logits, dim=1),dim=1))
+
+            # Scale loss and acc to find the average loss/acc per batch
+        loss /= len(data_loader)
+        acc /= len(data_loader)
+
+    
+    return {"model_name": model.__class__.__name__, # only works when model was created with a class
+            "model_loss": loss.item(),
+            "model_acc": acc,
+            "model_inf_time": mn_time}
 
 
 # Calculate accuracy (a classification metric)
@@ -100,7 +117,7 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     epochs = range(len(results['validation_loss']))
 
     # Setup a plot 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(8, 4))
 
     # Plot loss
     plt.subplot(1, 2, 1)
@@ -146,17 +163,18 @@ def get_predictions(model, dataloader, device):
 
 
 
-def plot_confusion_matrix(labels, pred_labels, classes):
-    fig = plt.figure(figsize=(10, 10))
+def plot_confusion_matrix(model, dataloader, device, classes):
+
+    images, labels, probs = get_predictions(model, dataloader, device)
+    pred_labels = torch.argmax(probs, 1)
+
+    fig = plt.figure(figsize=(6, 6))
     ax = fig.add_subplot(1, 1, 1)
     cm = confusion_matrix(labels,pred_labels)
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
 
-def cal_inference_time(model, device, dummy_input):
-
-    model.to(device)
-    dummy_input.to(device)
+def cal_inference_time(model, dummy_input):
 
     # INIT LOGGERS
     starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
