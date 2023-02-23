@@ -75,13 +75,13 @@ class VGG(nn.Module):
             return nn.Sequential(*layers)
 
 def VGG19(in_channels=3, in_height = 224, in_width = 224, num_classes=5):
-    return VGG(in_channels, in_height, in_width, num_classes=num_classes, architecture = VGG_types["VGG19"])
+    return VGG(in_channels = in_channels, in_height = in_height, in_width = in_width, num_classes=num_classes, architecture = VGG_types["VGG19"])
 
 def VGG16(in_channels=3, in_height = 224, in_width = 224, num_classes=5):
-    return VGG(in_channels, in_height, in_width, num_classes=num_classes, architecture = VGG_types["VGG16"])
+    return VGG(in_channels = in_channels, in_height = in_height, in_width = in_width, num_classes=num_classes, architecture = VGG_types["VGG16"])
 
 def VGG13(in_channels=3, in_height = 224, in_width = 224, num_classes=5):
-    return VGG(in_channels, in_height, in_width, num_classes=num_classes, architecture = VGG_types["VGG13"])
+    return VGG(in_channels = in_channels, in_height = in_height, in_width = in_width, num_classes=num_classes, architecture = VGG_types["VGG13"])
 
 def VGG11(in_channels=3, in_height = 224, in_width = 224, num_classes=5):
-    return VGG(in_channels, in_height, in_width, num_classes=num_classes, architecture = VGG_types["VGG111"])
+    return VGG(in_channels = in_channels, in_height = in_height, in_width = in_width, num_classes=num_classes, architecture = VGG_types["VGG111"])

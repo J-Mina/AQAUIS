@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from typing import Tuple, Dict, List
 import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import numpy as np
 
 def save_model(model_path, model_name, model):
 
@@ -83,8 +84,8 @@ def plot_loss_curves(results: Dict[str, List[float]]):
         results (dict): dictionary containing list of values, e.g.
             {"train_loss": [...],
              "train_acc": [...],
-             "test_loss": [...],
-             "test_acc": [...]}
+             "validation_loss": [...],
+             "validation_acc": [...]}
     """
     
     # Get the loss values of the results dictionary (training and test)
@@ -151,6 +152,36 @@ def plot_confusion_matrix(labels, pred_labels, classes):
     cm = confusion_matrix(labels,pred_labels)
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
+
+def cal_inference_time(model, device, dummy_input):
+
+    model.to(device)
+    dummy_input.to(device)
+
+    # INIT LOGGERS
+    starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+    repetitions = 100
+    timings=np.zeros((repetitions,1))
+
+    #GPU-WARM-UP
+    for _ in range(10):
+        _ = model(dummy_input)
+
+    # MEASURE PERFORMANCE
+    with torch.inference_mode():
+        for rep in range(repetitions):
+            starter.record()
+            _ = model(dummy_input)
+            ender.record()
+            # WAIT FOR GPU SYNC
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            timings[rep] = curr_time
+    mean_syn = np.sum(timings) / repetitions
+    std_syn = np.std(timings)
+
+    return mean_syn, std_syn
+
 
 def change_to_disk():
     #Change disk directory

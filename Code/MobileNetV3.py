@@ -103,12 +103,13 @@ class MobileNetV3(nn.Module):
         out = 1280 if config_name == "large" else 1024
 
         self.classifier = nn.Sequential(
-            ConvBlock(last_outchannel, last_exp, 1, 1, nn.Hardswish(),
+            ConvBlock(last_outchannel, last_exp, 1, 1, nn.Hardswish()),
             nn.AdaptiveAvgPool2d((1,1)),
             ConvBlock(last_exp, out, 1, 1, nn.Hardswish(), bn=False, bias = True),
             nn.Dropout(0.8),
-            nn.Conv2d(out, classes, 1, 1))
+            nn.Conv2d(out, classes, 1, 1)
         )
+        
  
     def forward(self, x:Tensor) -> Tensor:
         x = self.conv(x)
