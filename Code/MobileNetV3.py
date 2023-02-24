@@ -14,7 +14,7 @@ class ConvBlock(nn.Module):
                  bn = True, # Batch normalization
                  bias = False,
                  ):
-        super().__init__()
+        super(ConvBlock, self).__init__()
 
         padding = kernel_size //2
         self.c = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=groups, bias=bias)
@@ -30,7 +30,7 @@ class SeBlock(nn.Module):
         self, 
         in_channels : int
         ):
-        super().__init__()
+        super(SeBlock, self).__init__()
 
         C = in_channels
         r = C // 4
@@ -60,7 +60,7 @@ class BNeck(nn.Module):
                  se : bool,
                  act : torch.nn.modules.activation,
                  stride : int):
-        super().__init__()
+        super(BNeck, self).__init__()
 
         self.add = in_channels == out_channels and stride == 1
 
@@ -84,7 +84,7 @@ class MobileNetV3(nn.Module):
         config_name : str,
         in_channels = 3,
         classes = 5):
-        super().__init__()
+        super(MobileNetV3, self).__init__()
         config = self.config(config_name)
 
         #First convolutional layer
