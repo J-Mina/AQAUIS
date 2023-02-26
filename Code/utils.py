@@ -53,9 +53,16 @@ def eval_model(model: torch.nn.Module,
     Returns a dictionary containing the results of model predicting on data_loader (name, loss, accuracy, mean inference_time).
     """
 
-    mn_time, std_time = cal_inference_time(model, dummy_input)
+    # INIT LOGGERS
+    starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+    timings=[]
+
+    #GPU-WARM-UP
+    for _ in range(10):
+        _ = model(dummy_input)
 
     loss, acc = 0, 0
+    i=0
     model.eval()
     with torch.inference_mode():
         for X, y in tqdm(data_loader):
@@ -63,22 +70,33 @@ def eval_model(model: torch.nn.Module,
             y = y.to(device)
 
             # Make predictions
+            starter.record()
             y_pred_logits = model(X)
+            ender.record()
+
+            # WAIT FOR GPU SYNC
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            timings.append(curr_time)
 
             # Accumulate the loss and acc values per batch
             loss += loss_fn(y_pred_logits, y)
             acc += accuracy_fn(y_true=y,
                                 y_pred=torch.argmax(torch.softmax(y_pred_logits, dim=1),dim=1))
 
+            i+=1
+
             # Scale loss and acc to find the average loss/acc per batch
         loss /= len(data_loader)
         acc /= len(data_loader)
+        mean_inf_time = np.sum(timings) / i
+        std_inf_time = np.std(timings)
 
     
     return {"model_name": model.__class__.__name__, # only works when model was created with a class
             "model_loss": loss.item(),
             "model_acc": acc,
-            "model_inf_time": mn_time}
+            "model_inf_time": mean_inf_time}
 
 
 # Calculate accuracy (a classification metric)
