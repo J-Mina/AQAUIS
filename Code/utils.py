@@ -11,6 +11,14 @@ import numpy as np
 
 def save_model(model_path, model_name, model):
 
+    """
+    Save the model.
+
+    model_path : folder path in wich the model is saved.
+    model_name : name of the model (.pth).
+    model : model to save.
+    """
+
     check_dir(model_path)
 
     model_save_path = model_path / model_name
@@ -23,7 +31,7 @@ def save_model(model_path, model_name, model):
 
 def load_model(model, model_path):
     """
-    Not working.
+    Not working...
     """
 
     loaded_model = model()
@@ -103,10 +111,10 @@ def eval_model(model: torch.nn.Module,
 def accuracy_fn(y_true, y_pred):
     """Calculates accuracy between truth labels and predictions.
     Args:
-        y_true (torch.Tensor): Truth labels for predictions.
-        y_pred (torch.Tensor): Predictions to be compared to predictions.
+        y_true : Truth labels for predictions.
+        y_pred : Predictions to be compared to predictions.
     Returns:
-        [torch.float]: Accuracy value between y_true and y_pred, e.g. 78.45
+         Accuracy value between y_true and y_pred, e.g. 78.45
     """
     correct = torch.eq(y_true, y_pred).sum().item()
     acc = (correct / len(y_pred)) * 100
@@ -116,7 +124,7 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     """Plots training curves of a results dictionary.
 
     Args:
-        results (dict): dictionary containing list of values, e.g.
+        results : dictionary containing list of values, e.g.
             {"train_loss": [...],
              "train_acc": [...],
              "validation_loss": [...],
@@ -154,11 +162,18 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     plt.legend();
 
 def get_device():
+    """
+    Get the available device (cuda if available).
+    """
     device = "cuda" if torch.cuda.is_available() else "cpu"
     return device
 
 
 def get_predictions(model, dataloader, device):
+    """
+    Get the predictions of a model in a certain data running on a device.
+    """
+
     model.eval()
     images=[]
     labels=[]
@@ -182,7 +197,15 @@ def get_predictions(model, dataloader, device):
 
 
 def plot_confusion_matrix(model, dataloader, device, classes):
+    """
+    Plot the confusion matrix.
 
+    Args:
+    model : model to predict probabilities.
+    dataloader : data for ther model to use.
+    device : device to run the model.
+    classes : list of classes.
+    """
     images, labels, probs = get_predictions(model, dataloader, device)
     pred_labels = torch.argmax(probs, 1)
 
@@ -193,6 +216,9 @@ def plot_confusion_matrix(model, dataloader, device, classes):
     cm.plot(values_format='d', cmap='Blues', ax=ax)
 
 def cal_inference_time(model, dummy_input):
+    """
+    Calculate the inference time.
+    """
 
     # INIT LOGGERS
     starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)

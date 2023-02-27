@@ -9,8 +9,11 @@ from shutil import copyfile
 
 def convert_mp4_to_png(video_path, frame_path):
   """
-  video_path -> Path to the video to convert with the video name.
-  frame path -> Path to the folder in which frames should be saved and the video name as index to add the frame info.
+    Convert mp4 videos to png images.
+    
+    Args:
+    video_path : Path to the video to convert with the video name.
+    frame path : Path to the folder in which frames should be saved and the video name as index to add the frame info.
   """
   vidcap = cv2.VideoCapture(video_path)
   success,image = vidcap.read()
@@ -26,7 +29,7 @@ def convert_mp4_to_png(video_path, frame_path):
 
 def check_dir(DATASET_PATH):
     """
-        Verifies if the path of the Dataset is created
+        Verifies if the path of the Dataset is created, if not creates it.
     """
     if DATASET_PATH.is_dir():
         pass
@@ -44,8 +47,12 @@ def walk_through_dir(dir_path):
 def convert_all(DATASET_PATH, LIST_PATHS, RAW_DATA_PATH):
     """
     Convert all videos into images.
+
+    Args:
+    DATASET_PATH : path to where the dataset is split into classes.
+    LIST_PATHS : list with the classes folders in which the data is converted to.
+    RAW_DATA_PATH : path to the raw data.
     """
-    
     check_dir(DATASET_PATH)
 
     for i in range(len(LIST_PATHS)):
@@ -66,10 +73,10 @@ def split_data(data_source, data_folder, split_size, num_img_class = 0):
     Split all of the data into training, validation and testing with a split size.
 
     Args:
-    data_source -> Folder that has the dataset folder.
-    data_folder -> Folder in which the data should be splitted to.
-    split_size -> Ratio of training to testing data from [trainning(0-1),validation(0-1),testing(0-1)] make sure that the sum is 1.
-    num_img_class -> Number of images per class to keep in the dataset. (For the creation of smaller datasets or in this case balancing).
+    data_source : Folder that has the dataset folder.
+    data_folder : Folder in which the data should be splitted to.
+    split_size : Ratio of training to testing data from [trainning(0-1),validation(0-1),testing(0-1)] make sure that the sum is 1.
+    num_img_class : Number of images per class to keep in the dataset. (For the creation of smaller datasets or in this case balancing).
     
     """
 

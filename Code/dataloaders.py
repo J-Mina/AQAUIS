@@ -11,6 +11,8 @@ def create_dataloaders(
     num_workers:int=NUM_WORKERS):
 
     """
+    Create dataloaders for the data split into train/validation/test
+
     Args:
     data_dir : Path to data directory with (train/validation/test split).
     transform : torchvision transforms to perform on training, validation and testing data.
