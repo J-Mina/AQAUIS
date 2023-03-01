@@ -93,7 +93,6 @@ def train(model: torch.nn.Module,
 
   Returns:
   Returns numpy dictionary with train and validation loss and accuracy and training time
-  
   """
   
   results = {"train_loss": [],

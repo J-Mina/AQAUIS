@@ -80,11 +80,6 @@ def split_data(data_source, data_folder, split_size, num_img_class = 0):
     
     """
 
-    #Change disk directory
-    base_path = Path("G:/Dissertation/")
-    if(Path().cwd() != Path(r"G:\Dissertation")):
-        os.chdir(base_path)
-
     #Verify if the folder exists, if not creates it
     check_dir(data_folder)
 
@@ -157,6 +152,116 @@ def split_data(data_source, data_folder, split_size, num_img_class = 0):
                 destination = testing / filename
                 copyfile(this_file, destination)
         
+
+#### SPLIT DATA ####
+
+def split_data_dif(data_source_train, data_source_val_test, data_folder, split_size, num_img_class = 0):
+    """
+    Split all of the data into training, validation and testing with a split size.
+
+    Args:
+    data_source : Folder that has the dataset.
+    data_folder : Folder in which the data should be splitted into.
+    split_size : Ratio of training to testing data from [trainning(0-1),validation(0-1),testing(0-1)] make sure that the sum is 1.
+    num_img_class : Number of images per class to keep in the dataset. (For the creation of smaller datasets or in this case balancing).
+    
+    """
+
+    #Verify if the folder exists, if not creates it
+    check_dir(data_folder)
+
+    data_train = data_folder / Path('train/')
+    data_validation = data_folder / Path('validation/')
+    data_test = data_folder / Path('test/')
+
+    check_dir(data_train)
+    check_dir(data_validation)
+    check_dir(data_test)
+
+    if(sum(split_size) != 1):
+        print("SPLIT_SIZE is not valid")
+        return
+
+    for dir in os.listdir(data_source_train):
+        training = data_train / dir
+        check_dir(Path(training))
+
+        source = data_source_train / dir
+
+        files = []
+        print('Split trainning data')
+
+        for filename in os.listdir(source):
+            file = source / filename
+
+            if os.path.getsize(file) > 0:
+                files.append(filename)
+            else:
+                print(filename + "is zero lenght, so ignoring.")
+
+        num_imgs = len(files)
+
+        if(num_img_class != 0 ):
+            num_imgs = num_img_class
+
+        if( num_img_class > len(files)):
+            num_imgs = len(files)
+            print("Max number of images per class:", len(files))
+
+        training_length = int(num_imgs * split_size[0])
+
+        shuffled_set = random.sample(files, num_imgs)
+        training_set = shuffled_set[0:training_length]
+
+        for filename in training_set:
+            this_file = source / filename
+            destination = training / filename
+            copyfile(this_file, destination)
+
+
+    for dir in os.listdir(data_source_val_test):
+        testing = data_test / dir
+        validation = data_validation / dir
+        check_dir(Path(testing))
+        check_dir(Path(validation))
+
+        source = data_source_val_test / dir
+
+        files = []
+        print('Split Validation/testing data')
+
+        for filename in os.listdir(source):
+            file = source / filename
+            if os.path.getsize(file) > 0:
+                files.append(filename)
+            else:
+                print(filename + "is zero lenght, so ignoring.")
+
+        num_imgs = len(files)
+
+        if(num_img_class != 0 ):
+            num_imgs = num_img_class
+
+        if( num_img_class > len(files)):
+            num_imgs = len(files)
+            print("Max number of images per class:", len(files))
+
+        validation_length = int(num_imgs * split_size[1])
+        testing_length = int(num_imgs * split_size[2])
+
+        shuffled_set = random.sample(files, num_imgs)
+        validation_set = shuffled_set[0:validation_length]
+        testing_set = shuffled_set[validation_length:validation_length+testing_length]
+
+        for filename in validation_set:
+            this_file = source / filename
+            destination =validation / filename
+            copyfile(this_file, destination)
+        
+        for filename in testing_set:
+            this_file = source / filename
+            destination = testing / filename
+            copyfile(this_file, destination)
 
 
 

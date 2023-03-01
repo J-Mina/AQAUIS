@@ -120,7 +120,7 @@ def accuracy_fn(y_true, y_pred):
     acc = (correct / len(y_pred)) * 100
     return acc
 
-def plot_loss_curves(results: Dict[str, List[float]]):
+def plot_loss_curves(results: Dict[str, List[float]], title):
     """Plots training curves of a results dictionary.
 
     Args:
@@ -143,7 +143,8 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     epochs = range(len(results['validation_loss']))
 
     # Setup a plot 
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(6, 3))
+    plt.title(title)
 
     # Plot loss
     plt.subplot(1, 2, 1)
@@ -209,7 +210,7 @@ def plot_confusion_matrix(model, dataloader, device, classes):
     images, labels, probs = get_predictions(model, dataloader, device)
     pred_labels = torch.argmax(probs, 1)
 
-    fig = plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(1, 1, 1)
     cm = confusion_matrix(labels,pred_labels)
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
