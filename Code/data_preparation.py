@@ -246,8 +246,9 @@ def split_data_dif(data_source_train, data_source_val_test, data_folder, split_s
             num_imgs = len(files)
             print("Max number of images per class:", len(files))
 
-        validation_length = int(num_imgs * split_size[1])
-        testing_length = int(num_imgs * split_size[2])
+        length = num_img_class
+        validation_length = int(length * split_size[1])
+        testing_length = int(length * split_size[2])
 
         shuffled_set = random.sample(files, num_imgs)
         validation_set = shuffled_set[0:validation_length]

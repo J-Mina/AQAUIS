@@ -144,7 +144,7 @@ def plot_loss_curves(results: Dict[str, List[float]], title):
 
     # Setup a plot 
     plt.figure(figsize=(6, 3))
-    plt.title(title)
+    plt.suptitle(title)
 
     # Plot loss
     plt.subplot(1, 2, 1)
@@ -197,7 +197,7 @@ def get_predictions(model, dataloader, device):
 
 
 
-def plot_confusion_matrix(model, dataloader, device, classes):
+def plot_confusion_matrix(model, dataloader, device, classes, title):
     """
     Plot the confusion matrix.
 
@@ -212,9 +212,11 @@ def plot_confusion_matrix(model, dataloader, device, classes):
 
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(1, 1, 1)
+    
     cm = confusion_matrix(labels,pred_labels)
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
+    cm.ax_.set_title(title)
 
 def cal_inference_time(model, dummy_input):
     """

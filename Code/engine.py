@@ -46,7 +46,7 @@ def validation_step(model: torch.nn.Module,
               device=torch.device):
 
   """
-  Test step function.
+  Validation step function.
   """
   # Put model in eval mode
   model.eval()
