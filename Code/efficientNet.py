@@ -161,3 +161,28 @@ class EfficientNet(nn.Module):
     def forward(self, x):
         x = self.pool(self.features(x))
         return self.classifier(x.view(x.shape[0], -1))
+
+
+def EfficientNetB0():
+    return EfficientNet("b0", num_classes=5)
+
+def EfficientNetB1():
+    return EfficientNet("b1", num_classes=5)
+
+def EfficientNetB2():
+    return EfficientNet("b2", num_classes=5)
+
+def EfficientNetB3():
+    return EfficientNet("b3", num_classes=5)
+
+def EfficientNetB4():
+    return EfficientNet("b4", num_classes=5)
+
+def EfficientNetB5():
+    return EfficientNet("b5", num_classes=5)
+
+def EfficientNetB6():
+    return EfficientNet("b6", num_classes=5)
+
+def EfficientNetB7():
+    return EfficientNet("b7", num_classes=5)
