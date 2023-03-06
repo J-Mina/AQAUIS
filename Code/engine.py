@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from tqdm.auto import tqdm
 from timeit import default_timer as timer
+from utils import *
 
 #train step
 def train_step(model: torch.nn.Module,
@@ -77,7 +78,8 @@ def train(model: torch.nn.Module,
           validation_dataloader,
           optimizer,
           loss_fn: torch.nn.Module,
-          epochs: int = 5, 
+          epochs: int = 5,
+          name_save: str = "model",
           device= torch.device):
 
 
@@ -99,6 +101,9 @@ def train(model: torch.nn.Module,
              "train_acc": [],
              "validation_loss": [],
              "validation_acc": []}
+  
+  best_accuracy = 0.0
+  models_path = Path('Models/')
 
   start = timer()
   
@@ -113,6 +118,12 @@ def train(model: torch.nn.Module,
                                                       dataloader=validation_dataloader,
                                                       loss_fn=loss_fn,
                                                       device=device)
+    
+    if(validation_acc > best_accuracy):
+       path = Path(name_save + "_" + str(epoch) + "_epc.pth")
+       save_model(models_path, path, model)
+       best_accuracy = validation_acc
+       
     
     # Print out what's happening
     print(
