@@ -104,7 +104,8 @@ def eval_model(model: torch.nn.Module,
     return {"model_name": model.__class__.__name__, # only works when model was created with a class
             "model_loss": loss.item(),
             "model_acc": acc,
-            "model_inf_time": mean_inf_time}
+            "model_inf_time": mean_inf_time,
+            "std_inf_time": std_inf_time}
 
 
 # Calculate accuracy (a classification metric)
