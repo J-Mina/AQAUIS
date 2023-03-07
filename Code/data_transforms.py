@@ -28,14 +28,14 @@ def colorDeviation(image: Image.Image) -> Image.Image:
     return img
 
 def create_transform(
-        resize : int = 0,
+        resize : tuple,
         rotate : int = 0,
         color_dev : bool = True,
         transf_tensor : bool = True,
         normalize : bool = True):
     
-    if(resize != 0):
-        resize_cmd = transforms.Resize(size=(resize,resize))
+    if(sum(resize) != 0):
+        resize_cmd = transforms.Resize(size=(resize[0],resize[1]))
     else:
         resize_cmd = transforms.RandomHorizontalFlip(p=0)
     

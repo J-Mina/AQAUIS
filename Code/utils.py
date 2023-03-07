@@ -8,6 +8,8 @@ from typing import Tuple, Dict, List
 import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
+import random
+from PIL import Image
 
 def save_model(model_path, model_name, model):
 
@@ -254,3 +256,27 @@ def change_to_disk():
     base_path = Path("G:/Dissertation/")
     if(Path().cwd() != Path(r"G:\Dissertation")):
         os.chdir(base_path)
+
+
+def plot_transformed_images(image_paths: list, transform, n=3, seed=None):
+  """
+  Selects random images from a path of images and loads/transforms 
+  them then plots the original vs the transformed version.
+  """
+  if seed:
+    random.seed(seed)
+  random_image_paths = random.sample(image_paths, k=n)
+  for image_path in random_image_paths:
+    with Image.open(image_path) as f:
+      fig, ax = plt.subplots(nrows=1, ncols=2)
+      ax[0].imshow(f)
+      ax[0].set_title(f"Original\nSize: {f.size}")
+      ax[0].axis(False)
+
+      # Transform and plot target image
+      transformed_image = transform(f).permute(1, 2, 0) # note we will need to change shape for matplotlib (C, H, W) -> (H, W, C)
+      ax[1].imshow(transformed_image)
+      ax[1].set_title(f"Transformed\nShape: {transformed_image.shape}")
+      ax[1].axis("off")
+
+      fig.suptitle(f"Class: {image_path.parent.stem}", fontsize=16)
