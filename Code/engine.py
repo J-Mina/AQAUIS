@@ -103,7 +103,7 @@ def train(model: torch.nn.Module,
              "validation_acc": []}
   
   best_accuracy = 0.0
-  models_path = Path('Models/')
+  models_path = Path().cwd()
 
   start = timer()
   
@@ -120,7 +120,7 @@ def train(model: torch.nn.Module,
                                                       device=device)
     
     if(validation_acc > best_accuracy):
-       path = Path(name_save + "_" + str(epochs) + "_epc.pth")
+       path = Path( str(name_save) + "_" + str(epoch+1) + "_" + str(epochs) + "_epcs.pth")
        save_model(models_path, path, model)
        best_accuracy = validation_acc
        

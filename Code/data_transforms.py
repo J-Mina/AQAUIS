@@ -9,23 +9,29 @@ def colorDeviation(image: Image.Image) -> Image.Image:
     """
     Insert the usual color deviation of underwater images
     """
+    #Add probability
+    num = random.random()
 
-    #split image into color channels
-    b, g, r = image.split()
+    if num > 0.5 : 
+        #split image into color channels
+        b, g, r = image.split()
 
-    #dimming factor of the green channel
-    gnum = random.uniform(0.6,1)
+        #dimming factor of the green channel
+        gnum = random.uniform(0.6,1)
 
-    #dimming factor of the red channel
-    rnum = random.uniform(0,0.3)
+        #dimming factor of the red channel
+        rnum = random.uniform(0,0.3)
+        
+        #Apply the dimming factor
+        r = r.point(lambda i: i * rnum)
+        g = g.point(lambda i: i * gnum)
+
+        #return the resulting image
+        img = Image.merge('RGB', (r,g,b))
+        return img
     
-    #Apply the dimming factor
-    r = r.point(lambda i: i * rnum)
-    g = g.point(lambda i: i * gnum)
-
-    #return the resulting image
-    img = Image.merge('RGB', (r,g,b))
-    return img
+    else:
+        return image
 
 def create_transform(
         resize : tuple,

@@ -10,6 +10,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
 import random
 from PIL import Image
+import pandas as pd
 
 def save_model(model_path, model_name, model):
 
@@ -25,7 +26,7 @@ def save_model(model_path, model_name, model):
 
     model_save_path = model_path / model_name
 
-    print(f"Saving the model to: {model_save_path}")
+    #print(f"Saving the model to: {model_save_path}")
     torch.save(model.state_dict(),
                model_save_path)
 
@@ -280,3 +281,24 @@ def plot_transformed_images(image_paths: list, transform, n=3, seed=None):
       ax[1].axis("off")
 
       fig.suptitle(f"Class: {image_path.parent.stem}", fontsize=16)
+
+def final_save(folder_path, model_name, epochs, model, results):
+    """
+    Save the model and its results.
+
+    Args:
+    folder_path : folder to which the model and its results are saved.
+    model_name : name to atribute to the saved model.
+    epochs : number of epochs that the model was trained (added to its name).
+    model : model to save.
+    results : Any type of data from the model that is wished to be saved.
+    """
+    
+    #Save the final model
+    model_name_path = model_name +"_"+ str(epochs) + "_final.pth"
+    save_model(folder_path, model_name_path, model)
+    
+    #Save all results form the trainning and evaluation of the model
+    model_results_name = model_name +"_"+ str(epochs) + "_final_results.npy"
+    model_results_path = folder_path / model_results_name
+    np.save(model_results_path, results)
