@@ -149,7 +149,6 @@ def create_transform(
         gauss_noise_cmd,
         transf_cmd,
         normalize_cmd
-        
     ])
 
     return data_transform
