@@ -157,3 +157,8 @@ class MobileNetV3(nn.Module):
         if name == 'large': return large
         if name == 'small': return small
 
+def MobileNetSmall():
+    return MobileNetV3("small")
+
+def MobileNetLarge():
+    return MobileNetV3("large")

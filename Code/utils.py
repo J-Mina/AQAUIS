@@ -32,13 +32,14 @@ def save_model(model_path, model_name, model):
 
 
 
-def load_model(model, model_path):
+def load_model(model, model_path, device):
     """
-    Not working...
+    Not tested...
     """
 
     loaded_model = model()
-    loaded_model.load_state_dict(torch.load(model_path))
+    loaded_model.load_state_dict(torch.load(model_path, map_location=device))
+    load_model.eval()
 
     return loaded_model
 
@@ -302,3 +303,23 @@ def final_save(folder_path, model_name, epochs, model, results):
     model_results_name = model_name +"_"+ str(epochs) + "_final_results.npy"
     model_results_path = folder_path / model_results_name
     np.save(model_results_path, results)
+
+
+def load_results_model(model_name, model, epochs, best_epoch, device):
+    final_model = model()
+    best_model = model()
+
+    all_results_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final_results.npy")
+    final_model_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final.pth")
+    best_model_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(best_epoch) + "_" + str(epochs) + "_epcs.pth")
+
+    loaded_results = np.load(all_results_path, allow_pickle=True)
+    final_model.load_state_dict(torch.load(final_model_path, map_location=device))
+    best_model.load_state_dict(torch.load(best_model_path, map_location=device))
+
+    final_model.eval()
+    best_model.eval()
+
+    return loaded_results, final_model, best_model
+
+
