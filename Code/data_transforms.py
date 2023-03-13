@@ -19,28 +19,35 @@ def colorDeviation(image: Image.Image) -> Image.Image:
     #Add probability
     num = random.random()
 
-    if num > 0.5 : 
-        #split image into color channels
-        b, g, r = image.split()
+    if num > 0.5 :
+        num_b = random.uniform(0,1)
+        num_con = random.uniform(0,1)
+        num_sat = random.uniform(0,1)
+        num_hue = random.uniform(0,0.5)
 
-        #dimming factor of the blue channel
-        bnum = random.uniform(0.9,1)
+        image = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=num_hue)
+    #     #split image into color channels
+    #     b, g, r = image.split()
 
-        #dimming factor of the green channel
-        gnum = random.uniform(0.6,1)
+    #     #dimming factor of the blue channel
+    #     bnum = random.uniform(0.9,1)
 
-        #dimming factor of the red channel
-        rnum = random.uniform(0,0.3)
+    #     #dimming factor of the green channel
+    #     gnum = random.uniform(0.6,1)
+
+    #     #dimming factor of the red channel
+    #     rnum = random.uniform(0,0.3)
         
-        #Apply the dimming factor
-        b = b.point(lambda i: i * bnum)
-        r = r.point(lambda i: i * rnum)
-        g = g.point(lambda i: i * gnum)
+    #     #Apply the dimming factor
+    #     b = b.point(lambda i: i * bnum)
+    #     r = r.point(lambda i: i * rnum)
+    #     g = g.point(lambda i: i * gnum)
 
-        #return the resulting image
-        img = Image.merge('RGB', (r,g,b))
-        return img
-    
+    #     #return the resulting image
+    #     img = Image.merge('RGB', (r,g,b))
+    #     return img
+
+        return image
     else:
         return image
     
@@ -75,6 +82,16 @@ def SPNoise(image: Image.Image)->Image.Image:
 
 def GaussianNoise(image: Image.Image)->Image.Image:
 
+    """
+    Add Gaussian noise to a PIL image.
+
+    Args:
+        image (PIL.Image.Image): The input image.
+
+    Returns:
+        PIL.Image.Image: The noisy image.
+    """
+
     mean = 0
     var = 0.01
 
@@ -99,12 +116,20 @@ def GaussianNoise(image: Image.Image)->Image.Image:
 def create_transform(
         resize : tuple,
         rotate : int = 0,
+        flip_h : bool = True,
         color_dev : bool = True,
         transf_tensor : bool = True,
         normalize : bool = True,
         sp_noise : bool = False,
         gauss_noise : bool = False):
-    
+
+
+    # Random color parameters 
+    num_b = random.uniform(0.5,0.8)
+    num_con = random.uniform(0,0.8)
+    num_sat = random.uniform(0,0.8)
+    num_hue = random.uniform(0, 0.7)
+
     if(sum(resize) != 0):
         resize_cmd = transforms.Resize(size=(resize[0],resize[1]))
     else:
@@ -114,9 +139,14 @@ def create_transform(
         rotate_cmd = transforms.RandomRotation(rotate)
     else:
         rotate_cmd = transforms.RandomHorizontalFlip(p=0)
-    
+
+    if(flip_h):
+        flip_h_cmd = transforms.RandomHorizontalFlip(p=0.5)
+    else:
+        flip_h_cmd = transforms.RandomHorizontalFlip(p=0)
+
     if(color_dev):
-        color_dev_cmd = transforms.Lambda(colorDeviation)
+        color_dev_cmd = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=num_hue)
     else:
         color_dev_cmd = transforms.RandomHorizontalFlip(p=0)
 
@@ -144,6 +174,7 @@ def create_transform(
     data_transform = transforms.Compose([
         resize_cmd,
         rotate_cmd,
+        flip_h_cmd,
         color_dev_cmd,
         sp_noise_cmd,
         gauss_noise_cmd,
