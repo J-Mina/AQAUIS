@@ -126,9 +126,9 @@ def create_transform(
 
     # Random color parameters 
     num_b = random.uniform(0.5,0.8)
-    num_con = random.uniform(0,0.8)
-    num_sat = random.uniform(0,0.8)
-    num_hue = random.uniform(0, 0.7)
+    num_con = random.uniform(0.4,0.8)
+    num_sat = random.uniform(0.4,0.8)
+    num_hue = random.uniform(0,0.5)
 
     if(sum(resize) != 0):
         resize_cmd = transforms.Resize(size=(resize[0],resize[1]))
@@ -146,7 +146,7 @@ def create_transform(
         flip_h_cmd = transforms.RandomHorizontalFlip(p=0)
 
     if(color_dev):
-        color_dev_cmd = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=num_hue)
+        color_dev_cmd = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=[-num_hue, num_hue])
     else:
         color_dev_cmd = transforms.RandomHorizontalFlip(p=0)
 

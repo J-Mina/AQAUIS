@@ -323,3 +323,54 @@ def load_results_model(model_name, model, epochs, best_epoch, device):
     return loaded_results, final_model, best_model
 
 
+
+def plot_all_loss_curves(results_list: List[Dict[str, List[float]]], titles: List[str]):
+    """Plots training curves of a list of results dictionaries.
+
+    Args:
+        results_list : list of dictionaries containing lists of values, e.g.
+            [{"train_loss": [...], "train_acc": [...], "validation_loss": [...], "validation_acc": [...]},
+             {"train_loss": [...], "train_acc": [...], "validation_loss": [...], "validation_acc": [...]}, ...]
+        titles : list of strings for each set of results in results_list
+    """
+    num_results = len(results_list)
+
+    # Figure out how many epochs there were
+    epochs = range(len(results_list[0]['validation_loss']))
+
+    # Setup a plot with 1 row and 2 columns
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+    for i in range(num_results):
+        results = results_list[i]
+        title = titles[i]
+
+        # Get the loss values of the results dictionary (training and test)
+        loss = results['train_loss']
+        validation_loss = results['validation_loss']
+
+        # Get the accuracy values of the results dictionary (training and test)
+        accuracy = results['train_acc']
+        validation_accuracy = results['validation_acc']
+
+        # Plot loss
+        axes[0].plot(epochs, loss, label=f'{title} train_loss')
+        axes[0].plot(epochs, validation_loss, label=f'{title} validation_loss')
+        axes[0].set_title('Loss')
+        axes[0].set_xlabel('Epochs')
+        axes[0].set_ylabel('Loss')
+        axes[0].legend()
+
+        # Plot accuracy
+        axes[1].plot(epochs, accuracy, label=f'{title} train_accuracy')
+        axes[1].plot(epochs, validation_accuracy, label=f'{title} validation_accuracy')
+        axes[1].set_title('Accuracy')
+        axes[1].set_xlabel('Epochs')
+        axes[1].set_ylabel('Accuracy')
+        axes[1].legend()
+
+    plt.show()
+
+
+    
+
