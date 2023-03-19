@@ -305,13 +305,13 @@ def final_save(folder_path, model_name, epochs, model, results):
     np.save(model_results_path, results)
 
 
-def load_results_model(model_name, model, epochs, best_epoch, device):
+def load_results_model(model_name, models_folder, model, epochs, best_epoch, device):
     final_model = model()
     best_model = model()
 
-    all_results_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final_results.npy")
-    final_model_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final.pth")
-    best_model_path = Path("Models/") / Path(model_name) / Path(model_name + "_" + str(best_epoch) + "_" + str(epochs) + "_epcs.pth")
+    all_results_path = models_folder / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final_results.npy")
+    final_model_path = models_folder / Path(model_name) / Path(model_name + "_" + str(epochs) + "_final.pth")
+    best_model_path = models_folder / Path(model_name) / Path(model_name + "_" + str(best_epoch) + "_" + str(epochs) + "_epcs.pth")
 
     loaded_results = np.load(all_results_path, allow_pickle=True)
     final_model.load_state_dict(torch.load(final_model_path, map_location=device))

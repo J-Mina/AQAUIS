@@ -125,7 +125,7 @@ def create_transform(
 
 
     # Random color parameters 
-    num_b = random.uniform(0.5,0.8)
+    num_b = random.uniform(0.3,0.8)
     num_con = random.uniform(0.4,0.8)
     num_sat = random.uniform(0.4,0.8)
     num_hue = random.uniform(0,0.5)
