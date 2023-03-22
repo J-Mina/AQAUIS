@@ -10,7 +10,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
 import random
 from PIL import Image
-import pandas as pd
+#import pandas as pd
 
 def save_model(model_path, model_name, model):
 
@@ -94,7 +94,7 @@ def eval_model(model: torch.nn.Module,
             # Accumulate the loss and acc values per batch
             loss += loss_fn(y_pred_logits, y)
             acc += accuracy_fn(y_true=y,
-                                y_pred=torch.argmax(torch.softmax(y_pred_logits, dim=1),dim=1))
+                               y_pred=torch.sigmoid(y_pred_logits))
 
             i+=1
 
@@ -112,21 +112,32 @@ def eval_model(model: torch.nn.Module,
             "std_inf_time": std_inf_time}
 
 
-# Calculate accuracy (a classification metric)
+# Calculate accuracy for multilabel classification
 def accuracy_fn(y_true, y_pred):
-    """Calculates accuracy between truth labels and predictions.
-    Args:
-        y_true : Truth labels for predictions.
-        y_pred : Predictions to be compared to predictions.
-    Returns:
-         Accuracy value between y_true and y_pred, e.g. 78.45
     """
-    correct = torch.eq(y_true, y_pred).sum().item()
-    acc = (correct / len(y_pred)) * 100
-    return acc
+    Calculates the accuracy of a model given the true labels and predicted logits.
+
+    Parameters:
+    y_true (numpy array): True labels.
+    y_pred_logits (numpy array): Predicted logits.
+
+    Returns:
+    float: Accuracy of the model.
+    """
+    # Convert logits to predicted labels
+    y_pred = np.argmax(y_pred, axis=1)
+
+    # Calculate number of correct predictions
+    correct_predictions = np.sum(y_true == y_pred)
+
+    # Calculate accuracy
+    accuracy = correct_predictions / len(y_true)
+
+    return accuracy
 
 def plot_loss_curves(results: Dict[str, List[float]], title):
-    """Plots training curves of a results dictionary.
+    """
+    Plots training curves of a results dictionary.
 
     Args:
         results : dictionary containing list of values, e.g.
@@ -175,82 +186,82 @@ def get_device():
     return device
 
 
-def get_predictions(model, dataloader, device):
-    """
-    Get the predictions of a model in a certain data running on a device.
-    """
+# def get_predictions(model, dataloader, device):
+#     """
+#     Get the predictions of a model in a certain data running on a device.
+#     """
 
-    model.eval()
-    images=[]
-    labels=[]
-    probs = []
+#     model.eval()
+#     images=[]
+#     labels=[]
+#     probs = []
 
-    with torch.inference_mode():
-        for(X, y) in dataloader:
-            X = X.to(device)
-            y_pred  = model(X)
-            y_prob = F.softmax(y_pred, dim=-1)
-            images.append(X.cpu())
-            labels.append(y.cpu())
-            probs.append(y_prob.cpu())
+#     with torch.inference_mode():
+#         for(X, y) in dataloader:
+#             X = X.to(device)
+#             y_pred  = model(X)
+#             y_prob = F.softmax(y_pred, dim=-1)
+#             images.append(X.cpu())
+#             labels.append(y.cpu())
+#             probs.append(y_prob.cpu())
 
-    images = torch.cat(images, dim=0)
-    labels = torch.cat(labels, dim=0)
-    probs = torch.cat(probs, dim=0)
+#     images = torch.cat(images, dim=0)
+#     labels = torch.cat(labels, dim=0)
+#     probs = torch.cat(probs, dim=0)
 
-    return images, labels, probs
+#     return images, labels, probs
 
 
 
-def plot_confusion_matrix(model, dataloader, device, classes, title):
-    """
-    Plot the confusion matrix.
+# def plot_confusion_matrix(model, dataloader, device, classes, title):
+#     """
+#     Plot the confusion matrix.
 
-    Args:
-    model : model to predict probabilities.
-    dataloader : data for ther model to use.
-    device : device to run the model.
-    classes : list of classes.
-    """
-    images, labels, probs = get_predictions(model, dataloader, device)
-    pred_labels = torch.argmax(probs, 1)
+#     Args:
+#     model : model to predict probabilities.
+#     dataloader : data for ther model to use.
+#     device : device to run the model.
+#     classes : list of classes.
+#     """
+#     images, labels, probs = get_predictions(model, dataloader, device)
+#     pred_labels = torch.argmax(probs, 1)
 
-    fig = plt.figure(figsize=(4, 4))
-    ax = fig.add_subplot(1, 1, 1)
+#     fig = plt.figure(figsize=(4, 4))
+#     ax = fig.add_subplot(1, 1, 1)
     
-    cm = confusion_matrix(labels,pred_labels)
-    cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
-    cm.plot(values_format='d', cmap='Blues', ax=ax)
-    cm.ax_.set_title(title)
+#     cm = confusion_matrix(labels,pred_labels)
+#     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
+#     cm.plot(values_format='d', cmap='Blues', ax=ax)
+#     cm.ax_.set_title(title)
 
-def cal_inference_time(model, dummy_input):
-    """
-    Calculate the inference time.
-    """
+# def cal_inference_time(model, dummy_input):
+#     """
+#     Calculate the inference time.
+#     """
 
-    # INIT LOGGERS
-    starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-    repetitions = 100
-    timings=np.zeros((repetitions,1))
+#     # INIT LOGGERS
+#     starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+#     repetitions = 100
+#     timings=np.zeros((repetitions,1))
 
-    #GPU-WARM-UP
-    for _ in range(10):
-        _ = model(dummy_input)
+#     #GPU-WARM-UP
+#     for _ in range(10):
+#         _ = model(dummy_input)
 
-    # MEASURE PERFORMANCE
-    with torch.inference_mode():
-        for rep in range(repetitions):
-            starter.record()
-            _ = model(dummy_input)
-            ender.record()
-            # WAIT FOR GPU SYNC
-            torch.cuda.synchronize()
-            curr_time = starter.elapsed_time(ender)
-            timings[rep] = curr_time
-    mean_syn = np.sum(timings) / repetitions
-    std_syn = np.std(timings)
+#     # MEASURE PERFORMANCE
+#     with torch.inference_mode():
+#         for rep in range(repetitions):
+#             starter.record()
+#             _ = model(dummy_input)
+#             ender.record()
+#             # WAIT FOR GPU SYNC
+#             torch.cuda.synchronize()
+#             curr_time = starter.elapsed_time(ender)
+#             timings[rep] = curr_time
+#     mean_syn = np.sum(timings) / repetitions
+#     std_syn = np.std(timings)
 
-    return mean_syn, std_syn
+#     return mean_syn, std_syn
 
 
 def change_to_disk():
