@@ -26,27 +26,6 @@ def colorDeviation(image: Image.Image) -> Image.Image:
         num_hue = random.uniform(0,0.5)
 
         image = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=num_hue)
-    #     #split image into color channels
-    #     b, g, r = image.split()
-
-    #     #dimming factor of the blue channel
-    #     bnum = random.uniform(0.9,1)
-
-    #     #dimming factor of the green channel
-    #     gnum = random.uniform(0.6,1)
-
-    #     #dimming factor of the red channel
-    #     rnum = random.uniform(0,0.3)
-        
-    #     #Apply the dimming factor
-    #     b = b.point(lambda i: i * bnum)
-    #     r = r.point(lambda i: i * rnum)
-    #     g = g.point(lambda i: i * gnum)
-
-    #     #return the resulting image
-    #     img = Image.merge('RGB', (r,g,b))
-    #     return img
-
         return image
     else:
         return image
@@ -183,3 +162,4 @@ def create_transform(
     ])
 
     return data_transform
+

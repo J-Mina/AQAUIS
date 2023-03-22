@@ -23,7 +23,7 @@ def train_step(model: torch.nn.Module,
 
         y_pred = model(X)
 
-        loss = loss_fn(y_pred, y.float())
+        loss = loss_fn(y_pred, y)
         train_loss += loss.item()
 
         optimizer.zero_grad()
