@@ -97,7 +97,7 @@ def create_dataloaders_multilabel(
 
 
     #Get classes
-    class_names = train_data.class_to_idx
+    class_names = train_data.classes
 
     # Turn images into data loaders
     train_dataloader = DataLoader(dataset=train_data,

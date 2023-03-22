@@ -23,7 +23,7 @@ def train_step(model: torch.nn.Module,
 
         y_pred = model(X)
 
-        loss = loss_fn(y_pred, y)
+        loss = loss_fn(y_pred, y.float())
         train_loss += loss.item()
 
         optimizer.zero_grad()
@@ -60,7 +60,7 @@ def validation_step(model: torch.nn.Module,
 
       validation_pred_logits = model(X)
 
-      loss = loss_fn(validation_pred_logits, y)
+      loss = loss_fn(validation_pred_logits, y.float())
       validation_loss += loss.item()
 
       validation_pred_labels = torch.round(torch.sigmoid(validation_pred_logits))
