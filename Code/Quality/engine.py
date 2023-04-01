@@ -32,7 +32,7 @@ def train_step(model: torch.nn.Module,
 
         optimizer.step()
 
-        y_pred_class = torch.round(torch.sigmoid(y_pred))
+        y_pred_class = torch.round(torch.softmax(y_pred))
         train_acc += ((y_pred_class == y).sum(dim=1) == y.size()[1]).sum().item()/len(y_pred)
     
     train_loss = train_loss / len(dataloader)
@@ -63,7 +63,7 @@ def validation_step(model: torch.nn.Module,
       loss = loss_fn(validation_pred_logits, y.float())
       validation_loss += loss.item()
 
-      validation_pred_labels = torch.round(torch.sigmoid(validation_pred_logits))
+      validation_pred_labels = torch.round(torch.softmax(validation_pred_logits))
       validation_acc += ((validation_pred_labels == y).sum(dim=1) == y.size()[1]).sum().item()/len(validation_pred_labels)
 
   validation_loss = validation_loss / len(dataloader)
