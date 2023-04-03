@@ -125,48 +125,48 @@ import pandas as pd
 NUM_WORKERS = os.cpu_count()
 
 def find_classes(csv_file: str) -> List[str]:
-    classes = []
+    classes = set()
     
     df = pd.read_csv(csv_file)
 
     for index, row in df.iterrows():
-        labels = []
-
         if(row[2]):
-            labels.append('Camera Alignment')
+            classes.add('Camera Alignment')
 
         if(row[3]):
-            labels.append('Obstructed Camera')
+            classes.add('Obstructed Camera')
 
         if(row[4]):
-            labels.append('Over lighting')
+            classes.add('Over lighting')
 
         if(row[5]):
-            labels.append('Under lighting')
+            classes.add('Under lighting')
 
         if(row[6]):
-            labels.append('Saturated')
+            classes.add('Saturated')
 
-        classes.append(labels)
-    
-    return classes
+    return sorted(list(classes))
 
 class CustomImageFolderMultiLabel(torch.utils.data.Dataset):
     def __init__(self, csv_file, transform = None):
         self.data = pd.read_csv(csv_file)
         self.transform = transform
         self.image_paths = "Quality/dataset/" + self.data.iloc[:,-1] + "/" +  self.data.iloc[:,0] + ".png"
-        self.labels = self.data.iloc[:,2:7]
         self.classes = find_classes(csv_file)
+        self.num_classes = len(self.classes)
+        self.labels = torch.tensor(self.data.iloc[:,2:7].values, dtype=torch.float32)
 
     def __getitem__(self, index):
         image_path = self.image_paths.iloc[index]
-        label = self.labels.iloc[index]
-        classes = self.classes[index]
+        label = self.labels[index]
+        classes = torch.zeros(self.num_classes)
+        for i, c in enumerate(self.classes):
+            if c in self.data.iloc[index, 2:7].values:
+                classes[i] = 1.0
         image = Image.open(image_path).convert('RGB')
         if self.transform is not None:
             image = self.transform(image)
-        return image, label, classes
+        return image, label
     
     def __len__(self):
         return len(self.image_paths)

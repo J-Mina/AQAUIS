@@ -83,7 +83,7 @@ def eval_model(model: torch.nn.Module,
 
             # Make predictions
             starter.record()
-            y_pred_logits = model(X)
+            y_pred = model(X)
             ender.record()
 
             # WAIT FOR GPU SYNC
@@ -92,9 +92,10 @@ def eval_model(model: torch.nn.Module,
             timings.append(curr_time)
 
             # Accumulate the loss and acc values per batch
-            loss += loss_fn(y_pred_logits, y)
-            acc += accuracy_fn(y_true=y,
-                               y_pred=torch.sigmoid(y_pred_logits))
+            loss += loss_fn(y_pred, y)
+
+            y_pred_class = torch.round(torch.softmax(y_pred, dim=1))
+            acc += ((y_pred_class == y).sum(dim=1) == y.size()[1]).sum().item()/len(y_pred)
 
             i+=1
 
