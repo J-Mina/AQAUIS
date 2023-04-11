@@ -83,7 +83,7 @@ class MobileNetV3(nn.Module):
         self,
         config_name : str,
         in_channels = 3,
-        classes = 5):
+        classes = 3):
         super(MobileNetV3, self).__init__()
         config = self.config(config_name)
 
