@@ -39,7 +39,6 @@ def load_model(model, model_path, device):
 
     loaded_model = model()
     loaded_model.load_state_dict(torch.load(model_path, map_location=device))
-    load_model.eval()
 
     return loaded_model
 

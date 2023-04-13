@@ -114,7 +114,7 @@ def GaussianNoise(image: Image.Image)->Image.Image:
 
 
 def create_transform(
-        resize : tuple,
+        resize : tuple = [0,0],
         rotate : int = 0,
         flip_h : bool = True,
         color_dev : bool = True,
