@@ -7,7 +7,8 @@ from utils import *
 #train step
 def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
-               loss_fn: torch.nn.Module,
+               loss_fn_binary: torch.nn.Module,
+               loss_fn_multiclass: torch.nn.Module,
                optimizer:torch.optim.Optimizer,
                device= torch.device):
     """
@@ -21,55 +22,84 @@ def train_step(model: torch.nn.Module,
     for batch, (X, y) in enumerate(dataloader):
         X, y = X.to(device), y.to(device)
 
-        y_pred = model(X)
-
-        loss = loss_fn(y_pred, y.float())
-        train_loss += loss.item()
-
         optimizer.zero_grad()
+
+        y_pred_binary1, y_pred_binary2, y_pred_multiclass = model(X)
+
+        loss_binary1 = loss_fn_binary(y_pred_binary1, y[:, 0].unsqueeze(1).float())
+        loss_binary2 = loss_fn_binary(y_pred_binary2, y[:, 1].unsqueeze(1).float())
+        loss_multiclass = loss_fn_multiclass(y_pred_multiclass, y[:, 2])
+
+        loss = loss_binary1 + loss_binary2 + loss_multiclass
 
         loss.backward()
 
+        train_loss += loss.item()
+
         optimizer.step()
 
-        y_pred_class = torch.round(torch.softmax(y_pred, dim=1))
-        train_acc += ((y_pred_class == y).sum(dim=1) == y.size()[1]).sum().item()/len(y_pred)
-    
+        y_pred_binary1_class = torch.round(torch.sigmoid(y_pred_binary1))
+        y_pred_binary2_class = torch.round(torch.sigmoid(y_pred_binary2))
+        y_pred_multiclass_class = torch.argmax(y_pred_multiclass, dim=1)
+
+        acc_binary1 = ((y_pred_binary1_class == y[:, 0].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(y_pred_binary1)
+        acc_binary2 = ((y_pred_binary2_class == y[:, 1].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(y_pred_binary2)
+
+        # Calculate accuracy for multiclass head
+        acc_multiclass = (y_pred_multiclass_class == y[:, 2]).sum().item() / len(y_pred_multiclass)
+
+
+        train_acc += (acc_binary1 + acc_binary2 + acc_multiclass) / 3
+
     train_loss = train_loss / len(dataloader)
-    train_acc = train_acc / len(dataloader) 
+    train_acc = train_acc / len(dataloader)
     return train_loss, train_acc
 
 
-#validation step
 def validation_step(model: torch.nn.Module,
-              dataloader: torch.utils.data.DataLoader,
-              loss_fn: torch.nn.Module,
-              device=torch.device):
+                    dataloader: torch.utils.data.DataLoader,
+                    loss_fn_binary: torch.nn.Module,
+                    loss_fn_multiclass: torch.nn.Module,
+                    device=torch.device):
+    """
+    Validation step function.
+    """
+    # Put model in eval mode
+    model.eval()
 
-  """
-  Validation step function.
-  """
-  # Put model in eval mode
-  model.eval()
+    validation_loss, validation_acc = 0, 0
 
-  validation_loss, validation_acc = 0,  0
+    with torch.inference_mode():
+        for batch, (X, y) in enumerate(dataloader):
+            X, y = X.to(device), y.to(device)
 
-  with torch.inference_mode():
-    for batch, (X, y) in enumerate(dataloader): 
-      X, y = X.to(device), y.to(device)
+            # Forward pass
+            y_pred_binary1, y_pred_binary2, y_pred_multiclass = model(X)
 
-      validation_pred_logits = model(X)
+            # Calculate loss for each head
+            loss_binary1 = loss_fn_binary(y_pred_binary1, y[:, 0].unsqueeze(1).float())
+            loss_binary2 = loss_fn_binary(y_pred_binary2, y[:, 1].unsqueeze(1).float())
+            loss_multiclass = loss_fn_multiclass(y_pred_multiclass, y[:, 2])
 
-      loss = loss_fn(validation_pred_logits, y.float())
-      validation_loss += loss.item()
+            validation_loss += (loss_binary1.item() + loss_binary2.item() + loss_multiclass.item()) / 3
 
-      validation_pred_labels = torch.round(torch.softmax(validation_pred_logits, dim=1))
-      validation_acc += ((validation_pred_labels == y).sum(dim=1) == y.size()[1]).sum().item()/len(validation_pred_labels)
+            # Calculate accuracy for binary heads
+            pred_binary1 = torch.round(torch.sigmoid(y_pred_binary1))
+            pred_binary2 = torch.round(torch.sigmoid(y_pred_binary2))
+            acc_binary1 = ((pred_binary1 == y[:, 0].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(pred_binary1)
+            acc_binary2 = ((pred_binary2 == y[:, 1].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(pred_binary2)
 
-  validation_loss = validation_loss / len(dataloader)
-  validation_acc = validation_acc / len(dataloader)
+            # Calculate accuracy for multiclass head
+            pred_multiclass = torch.argmax(y_pred_multiclass, dim=1)
+            acc_multiclass = (pred_multiclass == y[:, 2]).sum().item() / len(pred_multiclass)
 
-  return validation_loss, validation_acc
+            validation_acc += (acc_binary1 + acc_binary2 + acc_multiclass) / 3
+
+    validation_loss = validation_loss / len(dataloader)
+    validation_acc = validation_acc / len(dataloader)
+
+    return validation_loss, validation_acc
+
 
 
 # Create a train function that takes in various model parameters + optimizer + dataloaders + loss function
@@ -77,7 +107,8 @@ def train(model: torch.nn.Module,
           train_dataloader,
           validation_dataloader,
           optimizer,
-          loss_fn: torch.nn.Module,
+          loss_fn_binary: torch.nn.Module,
+          loss_fn_multiclass: torch.nn.Module,
           epochs: int = 5,
           name_save: str = "model",
           device= torch.device):
@@ -110,13 +141,15 @@ def train(model: torch.nn.Module,
   for epoch in tqdm(range(epochs)):
     train_loss, train_acc = train_step(model=model,
                                        dataloader=train_dataloader,
-                                       loss_fn=loss_fn,
+                                       loss_fn_binary=loss_fn_binary,
+                                       loss_fn_multiclass = loss_fn_multiclass,
                                        optimizer=optimizer,
                                        device=device)
                                        
     validation_loss, validation_acc = validation_step(model=model,
                                                       dataloader=validation_dataloader,
-                                                      loss_fn=loss_fn,
+                                                      loss_fn_binary=loss_fn_binary,
+                                                      loss_fn_multiclass = loss_fn_multiclass,
                                                       device=device)
     
     if(validation_acc > best_accuracy):

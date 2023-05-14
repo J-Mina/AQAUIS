@@ -134,8 +134,11 @@ def find_classes(csv_file: str) -> List[str]:
         if(row[3]):
             classes.add('Obstructed Camera')
 
-        if(row[4]):
-            classes.add('Lighting issues')
+        if(row[4] == 1):
+            classes.add('Overlighting')
+
+        if(row[4] == 2):
+            classes.add('Underlighting')
 
     return sorted(list(classes))
 
@@ -144,7 +147,7 @@ class CustomImageFolderMultiLabel(torch.utils.data.Dataset):
         self.data = pd.read_csv(csv_file)
         self.transform = transform
         self.image_paths = "Quality/dataset/" + self.data.iloc[:,-1] + "/" +  self.data.iloc[:,0] + ".png"
-        self.classes = find_classes(csv_file)
+        self.classes = self.data.iloc[:,1]
         self.num_classes = len(self.classes)
         self.labels = torch.tensor(self.data.iloc[:,2:5].values, dtype=torch.float32)
 

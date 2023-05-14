@@ -123,16 +123,15 @@ class InvertedResidualBlock(nn.Module):
 
 
 class EfficientNet(nn.Module):
-    def __init__(self, version, num_classes):
+    def __init__(self, version, num_classes_binary, num_classes_multiclass):
         super(EfficientNet, self).__init__()
         width_factor, depth_factor, dropout_rate = self.calculate_factors(version)
         last_channels = ceil(1280 * width_factor)
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.features = self.create_features(width_factor, depth_factor, last_channels)
-        self.classifier = nn.Sequential(
-            nn.Dropout(dropout_rate),
-            nn.Linear(last_channels, num_classes),
-        )
+        self.head_binary1 = nn.Linear(last_channels, num_classes_binary)
+        self.head_binary2 = nn.Linear(last_channels, num_classes_binary)
+        self.head_multiclass = nn.Linear(last_channels, num_classes_multiclass)
 
     def calculate_factors(self, version, alpha=1.2, beta=1.1):
         phi, res, drop_rate = phi_values[version]
@@ -170,29 +169,49 @@ class EfficientNet(nn.Module):
 
     def forward(self, x):
         x = self.pool(self.features(x))
-        return self.classifier(x.view(x.shape[0], -1))
+        x = x.view(x.shape[0], -1)
+        output_binary1 = self.head_binary1(x)
+        output_binary2 = self.head_binary2(x)
+        output_multiclass = self.head_multiclass(x)
+        return output_binary1, output_binary2, output_multiclass
 
 
 def EfficientNetB0():
-    return EfficientNet("b0", num_classes=4)
+    num_classes_binary = 2  # Number of classes for binary classification
+    num_classes_multiclass = 3  # Number of classes for multi-class classification
+    return EfficientNet("b0", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB1():
-    return EfficientNet("b1", num_classes=5)
+    num_classes_binary = 2  
+    num_classes_multiclass = 3 
+    return EfficientNet("b1", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB2():
-    return EfficientNet("b2", num_classes=5)
+    num_classes_binary = 2  
+    num_classes_multiclass = 3 
+    return EfficientNet("b2", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB3():
-    return EfficientNet("b3", num_classes=5)
+    num_classes_binary = 2 
+    num_classes_multiclass = 3  
+    return EfficientNet("b3", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB4():
-    return EfficientNet("b4", num_classes=5)
+    num_classes_binary = 2 
+    num_classes_multiclass = 3 
+    return EfficientNet("b4", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB5():
-    return EfficientNet("b5", num_classes=5)
+    num_classes_binary = 2 
+    num_classes_multiclass = 3 
+    return EfficientNet("b5", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB6():
-    return EfficientNet("b6", num_classes=5)
+    num_classes_binary = 2 
+    num_classes_multiclass = 3  
+    return EfficientNet("b6", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB7():
-    return EfficientNet("b7", num_classes=5)
+    num_classes_binary = 2 
+    num_classes_multiclass = 3 
+    return EfficientNet("b7", num_classes_binary, num_classes_multiclass)
