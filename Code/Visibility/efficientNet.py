@@ -174,7 +174,7 @@ class EfficientNet(nn.Module):
 
 
 def EfficientNetB0():
-    return EfficientNet("b0", num_classes=4)
+    return EfficientNet("b0", num_classes=5)
 
 def EfficientNetB1():
     return EfficientNet("b1", num_classes=5)

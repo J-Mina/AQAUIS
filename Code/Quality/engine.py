@@ -20,14 +20,15 @@ def train_step(model: torch.nn.Module,
     train_loss, train_acc = 0,0
 
     for batch, (X, y) in enumerate(dataloader):
+        y = y.type(torch.LongTensor)
         X, y = X.to(device), y.to(device)
-
+        
         optimizer.zero_grad()
 
         y_pred_binary1, y_pred_binary2, y_pred_multiclass = model(X)
 
-        loss_binary1 = loss_fn_binary(y_pred_binary1, y[:, 0].unsqueeze(1).float())
-        loss_binary2 = loss_fn_binary(y_pred_binary2, y[:, 1].unsqueeze(1).float())
+        loss_binary1 = loss_fn_binary(torch.sigmoid(y_pred_binary1), y[:, 0].unsqueeze(1).float())
+        loss_binary2 = loss_fn_binary(torch.sigmoid(y_pred_binary2), y[:, 1].unsqueeze(1).float())
         loss_multiclass = loss_fn_multiclass(y_pred_multiclass, y[:, 2])
 
         loss = loss_binary1 + loss_binary2 + loss_multiclass
@@ -71,14 +72,15 @@ def validation_step(model: torch.nn.Module,
 
     with torch.inference_mode():
         for batch, (X, y) in enumerate(dataloader):
+            y = y.type(torch.LongTensor)
             X, y = X.to(device), y.to(device)
 
             # Forward pass
             y_pred_binary1, y_pred_binary2, y_pred_multiclass = model(X)
 
             # Calculate loss for each head
-            loss_binary1 = loss_fn_binary(y_pred_binary1, y[:, 0].unsqueeze(1).float())
-            loss_binary2 = loss_fn_binary(y_pred_binary2, y[:, 1].unsqueeze(1).float())
+            loss_binary1 = loss_fn_binary(torch.sigmoid(y_pred_binary1), y[:, 0].unsqueeze(1).float())
+            loss_binary2 = loss_fn_binary(torch.sigmoid(y_pred_binary2), y[:, 1].unsqueeze(1).float())
             loss_multiclass = loss_fn_multiclass(y_pred_multiclass, y[:, 2])
 
             validation_loss += (loss_binary1.item() + loss_binary2.item() + loss_multiclass.item()) / 3
@@ -86,8 +88,10 @@ def validation_step(model: torch.nn.Module,
             # Calculate accuracy for binary heads
             pred_binary1 = torch.round(torch.sigmoid(y_pred_binary1))
             pred_binary2 = torch.round(torch.sigmoid(y_pred_binary2))
+
             acc_binary1 = ((pred_binary1 == y[:, 0].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(pred_binary1)
             acc_binary2 = ((pred_binary2 == y[:, 1].unsqueeze(1)).sum(dim=1) == 1).sum().item() / len(pred_binary2)
+
 
             # Calculate accuracy for multiclass head
             pred_multiclass = torch.argmax(y_pred_multiclass, dim=1)

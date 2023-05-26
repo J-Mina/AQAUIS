@@ -177,41 +177,41 @@ class EfficientNet(nn.Module):
 
 
 def EfficientNetB0():
-    num_classes_binary = 2  # Number of classes for binary classification
+    num_classes_binary = 1  # Number of classes for binary classification
     num_classes_multiclass = 3  # Number of classes for multi-class classification
     return EfficientNet("b0", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB1():
-    num_classes_binary = 2  
+    num_classes_binary = 1  
     num_classes_multiclass = 3 
     return EfficientNet("b1", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB2():
-    num_classes_binary = 2  
+    num_classes_binary = 1  
     num_classes_multiclass = 3 
     return EfficientNet("b2", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB3():
-    num_classes_binary = 2 
+    num_classes_binary = 1 
     num_classes_multiclass = 3  
     return EfficientNet("b3", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB4():
-    num_classes_binary = 2 
+    num_classes_binary = 1 
     num_classes_multiclass = 3 
     return EfficientNet("b4", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB5():
-    num_classes_binary = 2 
+    num_classes_binary = 1 
     num_classes_multiclass = 3 
     return EfficientNet("b5", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB6():
-    num_classes_binary = 2 
+    num_classes_binary = 1 
     num_classes_multiclass = 3  
     return EfficientNet("b6", num_classes_binary, num_classes_multiclass)
 
 def EfficientNetB7():
-    num_classes_binary = 2 
+    num_classes_binary = 1 
     num_classes_multiclass = 3 
     return EfficientNet("b7", num_classes_binary, num_classes_multiclass)
