@@ -5,6 +5,28 @@ import torch
 import numpy as np
 from skimage.util import random_noise
 
+def splitFour(image: Image.Image) -> Image.Image:
+
+    image_array = np.array(image)  # Convert image to a NumPy array
+
+    h, w = image.size
+    w_half = w // 2
+    h_half = h // 2
+
+    img1 = image_array[:w_half, :h_half]
+    img2 = image_array[:w_half, h_half:]
+    img3 = image_array[w_half:, :h_half]
+    img4 = image_array[w_half:, h_half:]
+
+
+    # Convert the sliced images back to PIL Image objects if needed
+    img1 = Image.fromarray(img1)
+    img2 = Image.fromarray(img2)
+    img3 = Image.fromarray(img3)
+    img4 = Image.fromarray(img4)
+
+    return img1, img2, img3, img4
+
     
 def colorDeviation(image: Image.Image) -> Image.Image:
     """
@@ -128,7 +150,7 @@ def create_transform(
     num_b = random.uniform(0.3,0.8)
     num_con = random.uniform(0.4,0.8)
     num_sat = random.uniform(0.4,0.8)
-    num_hue = random.uniform(0,0.5)
+    num_hue = random.uniform(0,0.2)
 
     if(sum(resize) != 0):
         resize_cmd = transforms.Resize(size=(resize[0],resize[1]))
@@ -146,7 +168,7 @@ def create_transform(
         flip_h_cmd = transforms.RandomHorizontalFlip(p=0)
 
     if(color_dev):
-        color_dev_cmd = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=[-num_hue, num_hue])
+        color_dev_cmd = transforms.ColorJitter((0.9,1.05), (0.8,1.2), (0.9,1.1), hue=[-num_hue, num_hue])
     else:
         color_dev_cmd = transforms.RandomHorizontalFlip(p=0)
 
