@@ -6,7 +6,8 @@ from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from typing import Tuple, Dict, List
 import torch.nn.functional as F
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_curve, auc
+from sklearn.preprocessing import label_binarize
 import numpy as np
 import random
 from PIL import Image
@@ -221,6 +222,71 @@ def plot_confusion_matrix(model, dataloader, device, classes, title):
     cm = ConfusionMatrixDisplay(confusion_matrix = cm, display_labels = classes)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
     cm.ax_.set_title(title)
+
+
+def plot_all_measures(model, dataloader, device, classes, title):
+    """
+    Plot the confusion matrix, ROC curve, and print precision, recall, F1 score.
+
+    Args:
+    model : model to predict probabilities.
+    dataloader : data for the model to use.
+    device : device to run the model.
+    classes : list of classes.
+    """
+    images, labels, probs = get_predictions(model, dataloader, device)
+    pred_labels = torch.argmax(probs, 1)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Plot confusion matrix
+    cm = confusion_matrix(labels, pred_labels)
+    cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    cm_display.plot(values_format='d', cmap='Blues', ax=ax1)
+    cm_display.ax_.set_title(title)
+
+    # Calculate and print precision, recall, and F1 score for each class
+    precision = precision_score(labels, pred_labels, average=None)
+    recall = recall_score(labels, pred_labels, average=None)
+    f1 = f1_score(labels, pred_labels, average=None)
+    precision_avg = precision_score(labels, pred_labels, average='weighted')
+    recall_avg = recall_score(labels, pred_labels, average='weighted')
+    f1_avg = f1_score(labels, pred_labels, average='weighted')
+    for i in range(len(classes)):
+        ax1.text(0.5, -0.2 - i * 0.05, f"Precision ({classes[i]}): {precision[i]:.2f}, "
+                                        f"Recall ({classes[i]}): {recall[i]:.2f}, "
+                                        f"F1 Score ({classes[i]}): {f1[i]:.2f}",
+                 ha='center', transform=ax1.transAxes)
+    ax1.text(0.5, -0.2 - (len(classes) + 1) * 0.05, f"Avg Precision: {precision_avg:.2f}, "
+                                                  f"Avg Recall: {recall_avg:.2f}, "
+                                                  f"Avg F1 Score: {f1_avg:.2f}",
+             ha='center', transform=ax1.transAxes)
+
+    # Calculate ROC curve and AUC for each class
+    y_true = label_binarize(labels, classes=list(range(len(classes))))
+    n_classes = y_true.shape[1]
+    y_scores = label_binarize(pred_labels, classes=list(range(len(classes))))
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_true[:, i], y_scores[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Plot ROC curve
+    for i in range(n_classes):
+        ax2.plot(fpr[i], tpr[i], lw=2, label=f'ROC curve (AUC = {roc_auc[i]:.2f})')
+    ax2.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    ax2.set_xlim([0.0, 1.0])
+    ax2.set_ylim([0.0, 1.05])
+    ax2.set_xlabel('False Positive Rate')
+    ax2.set_ylabel('True Positive Rate')
+    ax2.set_title('Receiver Operating Characteristic')
+    ax2.legend(loc="lower right")
+
+    plt.tight_layout()
+    plt.show()
+
 
 def cal_inference_time(model, dummy_input):
     """

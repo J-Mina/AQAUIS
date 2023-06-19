@@ -4,6 +4,23 @@ from tqdm.auto import tqdm
 from timeit import default_timer as timer
 from utils import *
 
+# class EarlyStopper:
+#     def __init__(self, patience=5, min_delta=0.1):
+#         self.patience = patience
+#         self.min_delta = min_delta
+#         self.counter = 0
+#         self.min_validation_loss = np.inf
+
+#     def early_stop(self, validation_loss):
+#         if validation_loss < self.min_validation_loss:
+#             self.min_validation_loss = validation_loss
+#             self.counter = 0
+#         elif validation_loss > (self.min_validation_loss + self.min_delta):
+#             self.counter += 1
+#             if self.counter >= self.patience:
+#                 return True
+#         return False
+
 #train step
 def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
@@ -106,6 +123,8 @@ def train(model: torch.nn.Module,
   models_path = Path().cwd()
 
   start = timer()
+
+#   early_stopper = EarlyStopper(patience=5, min_delta=0.1)
   
   for epoch in tqdm(range(epochs)):
     train_loss, train_acc = train_step(model=model,
@@ -123,6 +142,9 @@ def train(model: torch.nn.Module,
        path = Path( str(name_save) + "_" + str(epoch+1) + "_" + str(epochs) + "_epcs.pth")
        save_model(models_path, path, model)
        best_accuracy = validation_acc
+
+    # if early_stopper.early_stop(validation_loss):             
+    #     break
        
     
     # Print out what's happening
