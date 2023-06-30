@@ -42,9 +42,9 @@ def colorDeviation(image: Image.Image) -> Image.Image:
     num = random.random()
 
     if num > 0.5 :
-        num_b = random.uniform(0,1)
-        num_con = random.uniform(0,1)
-        num_sat = random.uniform(0,1)
+        num_b = random.uniform(0.5,1)
+        num_con = random.uniform(0.5,1.1)
+        num_sat = random.uniform(0.5,1.1)
         num_hue = random.uniform(0,0.5)
 
         image = transforms.ColorJitter(brightness=num_b, contrast=num_con, saturation=num_sat, hue=num_hue)

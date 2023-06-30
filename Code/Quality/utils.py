@@ -384,5 +384,65 @@ def plot_all_loss_curves(results_list: List[Dict[str, List[float]]], titles: Lis
     plt.show()
 
 
-    
+
+def get_predictions(model, dataloader, device):
+    """
+    Get the predictions of a model on a certain data running on a device.
+    """
+
+    model.eval()
+    images = []
+    labels = []
+    preds = []
+
+    with torch.no_grad():
+        for X, y in dataloader:
+            X = X.to(device)
+            y_pred = model(X)
+            if isinstance(y_pred, tuple):
+                y_pred = y_pred[0]  # Handle tuple output
+            y_prob = F.softmax(y_pred, dim=-1)
+            _, pred = torch.max(y_prob, 1)
+            
+            images.append(X.cpu())
+            labels.append(y.cpu())
+            preds.append(pred.cpu())
+
+    images = torch.cat(images, dim=0)
+    labels = torch.cat(labels, dim=0)
+    preds = torch.cat(preds, dim=0)
+
+    return images, labels, preds
+
+
+def plot_confusion_matrix(model, dataloader, device, classes, title):
+    """
+    Plot the confusion matrix.
+
+    Args:
+    model: model to predict probabilities.
+    dataloader: data for the model to use.
+    device: device to run the model.
+    classes: list of classes.
+    title: title of the confusion matrix plot.
+    """
+    images, labels, preds = get_predictions(model, dataloader, device)
+
+    # Convert labels and predictions to numpy arrays
+    labels = labels.numpy().astype(int)  # Convert to integer type
+    preds = preds.numpy().astype(int)  # Convert to integer type
+
+    # Create confusion matrix
+    num_classes = len(classes)
+    cm = np.zeros((num_classes, num_classes))
+    for i in range(len(labels)):
+        cm[labels[i], preds[i]] += 1
+
+    # Plot confusion matrix
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(1, 1, 1)
+    cm_display = ConfusionMatrixDisplay(cm, display_labels=classes)
+    cm_display.plot(values_format='.0f', cmap='Blues', ax=ax)  # Use '.0f' format code
+    cm_display.ax_.set_title(title)
+    plt.show()
 

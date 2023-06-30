@@ -6,7 +6,7 @@ from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from typing import Tuple, Dict, List
 import torch.nn.functional as F
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_curve, auc
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_curve, auc, accuracy_score
 from sklearn.preprocessing import label_binarize
 import numpy as np
 import random
@@ -226,7 +226,7 @@ def plot_confusion_matrix(model, dataloader, device, classes, title):
 
 def plot_all_measures(model, dataloader, device, classes, title):
     """
-    Plot the confusion matrix, ROC curve, and print precision, recall, F1 score.
+    Plot the confusion matrix, ROC curve, and print precision, recall, F1 score, and accuracy.
 
     Args:
     model : model to predict probabilities.
@@ -245,7 +245,8 @@ def plot_all_measures(model, dataloader, device, classes, title):
     cm_display.plot(values_format='d', cmap='Blues', ax=ax1)
     cm_display.ax_.set_title(title)
 
-    # Calculate and print precision, recall, and F1 score for each class
+    # Calculate and print precision, recall, F1 score, and accuracy for each class
+    accuracy = accuracy_score(labels, pred_labels)
     precision = precision_score(labels, pred_labels, average=None)
     recall = recall_score(labels, pred_labels, average=None)
     f1 = f1_score(labels, pred_labels, average=None)
@@ -259,7 +260,8 @@ def plot_all_measures(model, dataloader, device, classes, title):
                  ha='center', transform=ax1.transAxes)
     ax1.text(0.5, -0.2 - (len(classes) + 1) * 0.05, f"Avg Precision: {precision_avg:.2f}, "
                                                   f"Avg Recall: {recall_avg:.2f}, "
-                                                  f"Avg F1 Score: {f1_avg:.2f}",
+                                                  f"Avg F1 Score: {f1_avg:.2f}, "
+                                                  f"Accuracy: {accuracy}",
              ha='center', transform=ax1.transAxes)
 
     # Calculate ROC curve and AUC for each class
@@ -280,6 +282,8 @@ def plot_all_measures(model, dataloader, device, classes, title):
     ax2.set_xlim([0.0, 1.0])
     ax2.set_ylim([0.0, 1.05])
     ax2.set_xlabel('False Positive Rate')
+   
+
     ax2.set_ylabel('True Positive Rate')
     ax2.set_title('Receiver Operating Characteristic')
     ax2.legend(loc="lower right")
@@ -386,6 +390,8 @@ def load_results_model(model_name, models_folder, model, epochs, best_epoch, dev
     best_model.eval()
 
     return loaded_results, final_model, best_model
+
+
 
 
 
